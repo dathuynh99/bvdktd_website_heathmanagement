@@ -83,3 +83,33 @@ body {
 .content {
     padding: 80px 20px;
 }
+
+/* 🔹 Responsive tối ưu hiển thị trên di động */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        text-align: center;
+        padding: 10px;
+    }
+    .menu {
+        display: none; /* Ẩn menu trên mobile */
+    }
+    .menu-icon {
+        display: block; /* Hiển thị nút menu ☰ */
+        font-size: 28px;
+    }
+    .sidebar {
+        width: 100%; /* Sidebar rộng toàn màn hình */
+        left: -100%;
+    }
+    .sidebar.active {
+        transform: translateX(100%);
+    }
+    .sidebar a {
+        font-size: 20px;
+        text-align: center;
+    }
+    .content {
+        padding: 60px 15px;
+    }
+}
