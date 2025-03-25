@@ -97,6 +97,7 @@ body {
     .menu-icon {
         display: block; /* Hiển thị nút menu ☰ */
         font-size: 28px;
+        align-self: flex-start; /* Đưa icon menu về bên trái */
     }
     .sidebar {
         width: 100%; /* Sidebar rộng toàn màn hình */
