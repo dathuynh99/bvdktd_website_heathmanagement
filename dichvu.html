@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dịch Vụ</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <span class="menu-icon" onclick="openSidebar()">☰</span>
+        <div class="menu">
+            <a href="index.html">🏠 Trang chủ</a>
+            <a href="sanpham.html">Sản phẩm</a>
+            <a href="dichvu.html">Dịch vụ</a>
+            <a href="lienhe.html">Liên hệ</a>
+        </div>
+    </div>
+
+    <!-- Overlay nền mờ -->
+    <div id="overlay" class="overlay" onclick="closeSidebar()"></div>
+
+    <!-- Sidebar -->
+    <div id="mySidebar" class="sidebar">
+        <a href="javascript:void(0)" class="close-btn" onclick="closeSidebar()">✖</a>
+        <a href="index.html">Trang chủ</a>
+        <a href="sanpham.html">Sản phẩm</a>
+        <a href="dichvu.html">Dịch vụ</a>
+        <a href="lienhe.html">Liên hệ</a>
+    </div>
+
+    <!-- Nội dung -->
+    <div class="content">
+        <h2>Dịch vụ của chúng tôi</h2>
+        <p>Danh sách các dịch vụ mới nhất.</p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
