@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="vi">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Quản lý dữ liệu</title>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <!-- Thư viện Noti đẹp -->
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+        <style>
+            body { font-family: 'Roboto', sans-serif; text-align: center; padding: 20px; background: #f5f5f5; }
+            .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); }
+            table { width: 100%; margin-top: 20px; }
+            th, td { padding: 10px; text-align: -webkit-match-parent; text-align: match-parent; }
+            .title { font-size: 2rem; font-weight: bold; color: #4096ec; text-transform: uppercase; margin-bottom: 20px; }
+            .striped tbody tr:nth-child(odd) { background-color: #e3f2fd; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h4 class="title">Nhập Thông Tin và Chỉ số sức khỏe của nhân viên</h4>
+<!-- Thông tin cá nhân cơ bản -->
+            <div class="input-field">
+                <input type="text" id="name">
+                <label for="name">Họ và tên</label> 
+            </div>
+            <div class="input-field">
+                <input type="text" id="jobtitle">
+                <label for="jobtitle">Chức danh nghề nghiệp</label>
+            </div>
+            <div class="input-field">
+                <input type="number" id="age" oninput="this.value = this.value.slice(0, 4);" 
+                onblur="if (this.value.length < 4 || (this.value.length === 4 && (this.value < 1900 || this.value > 2099))) { 
+                    Swal.fire('Lỗi', 'Năm sinh không hợp lệ. Vui lòng kiểm tra lại.', 'error'); 
+                }">
+                <label for="age">Năm sinh</label>
+            </div>
+            <div class="input-field">
+                <input type="number" id="phone" oninput="this.value = this.value.slice(0, 10);" 
+                onblur="if (this.value.length < 10 || this.value.length > 11) {
+                    Swal.fire('Lỗi', 'Vui lòng kiểm tra lại số điện thoại có đúng không', 'error');
+                }">
+                <label for="phone">Số điện thoại</label>
+            </div>
+<!-- Chỉ số sức khỏe (Chiều cao) (Cân nặng) (BMI) -->
+            <div class="input-field custom-height">
+                <input type="text" id="height" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="flex-input">
+                <label for="height">Chiều cao</label>
+                <span class="unit-label">cm</span>
+            </div>
+            <style>
+                .custom-height{
+                    display: flex; 
+                    align-items: center;
+                }
+            </style>
+            <div class="input-field custom-wweight">
+                <input type="text" id="weight" oninput="this.value = this.value.replace(/[^0-9]/g, ''); calculateBMI();">
+                <label for="weight">Cân nặng</label>
+                <span class="unit-label">kg</span>
+            </div>
+            <style>
+                .custom-wweight{
+                    display: flex; 
+                    align-items: center;
+                }
+            </style>
+            <div class="input-field">
+                <input type="text" id="bmi" value="0.0" readonly>
+                <label for="bmi">BMI</label>
+            </div>
+<!-- Chỉ số xét nghiệm (Huyết Áp) (Glucose) (Ure) (Creatinin) -->
+            <div class="input-field custom-bloodpressure">
+                <input type="text" id="bloodpressure" oninput="this.value = this.value.replace(/[^0-9/]/g, '').replace(/(\/.*\/)/g, '/');" pattern="^\d{1,3}\/\d{1,3}$" placeholder="Nhập dạng số với định dạng ../..">
+                <label for="bloodpressure">Huyết áp</label>
+                <span class="unit-label">mmHg</span>
+            </div>
+            <style>
+                .custom-bloodpressure{
+                    display: flex; 
+                    align-items: center;
+                }
+            </style>
+            <div class="input-field align-center">
+                <input type="text" id="whitebloodcell" 
+                       oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" 
+                       onblur="if (this.value && !this.value.includes(',')) { this.value += ',0'; } else if (this.value.endsWith(',')) { this.value += '0'; }" 
+                       placeholder="Nhập dạng số với định dạng ..,..">
+                <label for="whitebloodcell">Bạch Cầu</label>
+            </div>
+            <div class="input-field align-center">
+                <input type="text" id="redbloodcell" 
+                        oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" 
+                        onblur="if (this.value && !this.value.includes(',')) { this.value += ',0'; } else if (this.value.endsWith(',')) { this.value += '0'; }" 
+                        placeholder="Nhập dạng số với định dạng ..,..">
+                <label for="redbloodcell">Hồng Cầu</label>
+            </div>
+            <div class="input-field align-center">
+                <input type="number" id="platelet">
+                <label for="platelet">Tiểu Cầu</label>
+            </div>
+            <div class="input-field align-center">
+                <input type="text" id="Glucose" 
+                    oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" 
+                    onblur="if (this.value && !this.value.includes(',')) { this.value += ',0'; } else if (this.value.endsWith(',')) { this.value += '0'; }" 
+                    placeholder="Nhập dạng số với định dạng ..,..">
+                <label for="Glucose">Glucose</label>
+            </div>
+            <div class="input-field align-center">
+                <input type="text" id="Ure" 
+                    oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" 
+                    onblur="if (this.value && !this.value.includes(',')) { this.value += ',0'; } else if (this.value.endsWith(',')) { this.value += '0'; }" 
+                    placeholder="Nhập dạng số với định dạng ..,..">
+                <label for="Ure">Ure</label>
+            </div>
+            <div class="input-field align-center">
+                <input type="text" id="Creatinin" 
+                    oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" 
+                    onblur="if (this.value && !this.value.includes(',')) { this.value += ',0'; } else if (this.value.endsWith(',')) { this.value += '0'; }" 
+                    placeholder="Nhập dạng số với định dạng ..,..">
+                <label for="Creatinin">Creatinin</label>
+            </div>
+            <div class="input-field align-center">
+                <input type="text" id="SGOT" 
+                    oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" 
+                    onblur="if (this.value && !this.value.includes(',')) { this.value += ',0'; } else if (this.value.endsWith(',')) { this.value += '0'; }" 
+                    placeholder="Nhập dạng số với định dạng ..,..">
+                <label for="SGOT">SGOT (AST)</label>
+            </div>
+            <div class="input-field align-center">
+                <input type="text" id="SGPT" 
+                    oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" 
+                    onblur="if (this.value && !this.value.includes(',')) { this.value += ',0'; } else if (this.value.endsWith(',')) { this.value += '0'; }" 
+                    placeholder="Nhập dạng số với định dạng ..,..">
+                <label for="SGPT">SGPT (ALT)</label>
+            </div>
+
+            <button class="btn waves-effect waves-light" onclick="saveData()">Lưu Dữ Liệu</button>
+    
+            <h4 class="title">Xóa dữ liệu</h4>
+            <div class="input-field">
+                <input type="number" id="deleteID">
+                <label for="deleteID">ID cần xóa</label>
+            </div>
+            <button class="btn red lighten-1 waves-effect waves-light" onclick="deleteData()">Xóa dữ liệu</button>
+    
+            <h4 class="title">Tìm kiếm dữ liệu</h4>
+            <div class="input-field">
+                <input type="text" id="searchInput">
+                <label for="searchInput">Nhập ID hoặc tên cần tìm</label>
+            </div>
+            <button class="btn blue waves-effect waves-light" onclick="searchData()">Tìm kiếm</button>
+    
+            <table class="striped centered highlight">
+                <thead class="blue white-text">
+                    <tr>
+                        <th>ID</th>
+                        <th>Họ tên</th>
+                        <th>Năm Sinh</th>
+                        <th>SĐT</th>
+                    </tr>
+                </thead>
+                <tbody id="resultTable"></tbody>
+            </table>
+
+            <div style="margin-top: 30px;">
+                <button class="btn dark red waves-effect waves-light" style="font-weight: bold; background-color: #b71c1c;" onclick="logout()">Đăng xuất</button>
+            </div>
+        </div>
+
+    <script>
+        const scriptURL = "https://script.google.com/macros/s/AKfycbz_eGXI1hGmeHjtElHxPXzciawj1a9DQkWNL3spjJXr5EDbmTRMm8TQvpnyk2-59vFn/exec";
+
+        function clearInputs(inputs) {
+            inputs.forEach(id => document.getElementById(id).value = "");
+        }
+
+        function calculateBMI() {
+            const height = parseFloat(document.getElementById("height").value) / 100; // Convert cm to meters
+            const weight = parseFloat(document.getElementById("weight").value);
+            if (height > 0 && weight > 0) {
+                const bmi = (weight / (height * height)).toFixed(2);
+                document.getElementById("bmi").value = bmi;
+            } else {
+                document.getElementById("bmi").value = "";
+            }
+        }
+        document.getElementById("height").addEventListener("input", calculateBMI);
+
+        function saveData() {
+            let name = document.getElementById("name").value.trim();
+            let jobtitle = document.getElementById("jobtitle").value.trim();
+            let age = document.getElementById("age").value.trim();
+            let phone = document.getElementById("phone").value.trim();
+            let height = document.getElementById("height").value.trim();
+            let weight = document.getElementById("weight").value.trim();
+            let bmi = document.getElementById("bmi").value.trim();
+            let bloodpressure = document.getElementById("bloodpressure").value.trim();
+            let whitebloodcell = document.getElementById("whitebloodcell").value.trim();
+            let redbloodcell = document.getElementById("redbloodcell").value.trim();
+            let platelet = document.getElementById("platelet").value.trim();
+            let Glucose = document.getElementById("Glucose").value.trim();
+            let Ure = document.getElementById("Ure").value.trim();
+            let Creatinin = document.getElementById("Creatinin").value.trim();
+            let SGOT = document.getElementById("SGOT").value.trim();
+            let SGPT = document.getElementById("SGPT").value.trim();
+
+            if (!name.trim() || !jobtitle.trim() || !age.trim() || !phone.trim() || !height.trim() || !weight.trim() || !bmi.trim()
+                || !bloodpressure.trim() || !whitebloodcell.trim() || !redbloodcell.trim() || !platelet.trim() 
+                || !Glucose.trim() || !Ure.trim() || !Creatinin.trim() || !SGOT.trim() || !SGPT.trim()) {
+                Swal.fire("Lỗi", "Vui lòng nhập đầy đủ thông tin.", "error");
+                return;
+            }
+
+            let url = `${scriptURL}?action=save` +
+                      `&name=${encodeURIComponent(name)}` +
+                      `&jobtitle=${encodeURIComponent(jobtitle)}` +
+                      `&age=${encodeURIComponent(age)}` +
+                      `&phone=${encodeURIComponent(phone)}` +
+                      `&height=${encodeURIComponent(height)}` +
+                      `&weight=${encodeURIComponent(weight)}` +
+                      `&bmi=${encodeURIComponent(bmi)}` +
+                      `&bloodpressure=${encodeURIComponent(bloodpressure)}` +
+                      `&whitebloodcell=${encodeURIComponent(whitebloodcell)}` +
+                      `&redbloodcell=${encodeURIComponent(redbloodcell)}` +
+                      `&platelet=${encodeURIComponent(platelet)}` +
+                      `&Glucose=${encodeURIComponent(Glucose)}` +
+                      `&Ure=${encodeURIComponent(Ure)}` +
+                      `&Creatinin=${encodeURIComponent(Creatinin)}` +
+                      `&SGOT=${encodeURIComponent(SGOT)}` +
+                      `&SGPT=${encodeURIComponent(SGPT)}`;
+
+            fetch(url)
+                .then(response => response.text())
+                .then(data => {
+                    Swal.fire("Thành công", data, "success");
+                    clearInputs([ "name", "jobtitle", "age", "phone", "height", "weight", "bmi", 
+                                  "bloodpressure", "whitebloodcell", "redbloodcell", "platelet", 
+                                  "Glucose", "Ure", "Creatinin", "SGOT", "SGPT"]);
+                    M.updateTextFields();
+                    // Hiển thị thông báo ở một vụ trí cố định trên web
+                    // document.getElementById("result").innerHTML = data;
+                })
+                .catch(error => console.error("Lỗi:", error));
+        }
+
+        function deleteData() {
+            let id = document.getElementById("deleteID").value;
+            if (!id) {
+                Swal.fire("Lỗi", "Vui lòng nhập ID để xóa.", "error");
+                return;
+            }
+            let url = `${scriptURL}?action=delete&id=${encodeURIComponent(id)}`;
+            fetch(url)
+                .then(response => response.text())
+                .then(data => {
+                    Swal.fire("Thông báo", data, "info");
+                    clearInputs(["deleteID"]);
+                    M.updateTextFields();
+                    // Clear the resultTable after deletion
+                    document.getElementById("resultTable").innerHTML = "";
+                })
+                .catch(error => console.error("Lỗi:", error));
+        }
+
+        function searchData() {
+            let query = document.getElementById("searchInput").value.trim();
+            if (!query) {
+                Swal.fire("Lỗi", "Vui lòng nhập ID hoặc tên để tìm kiếm.", "error");
+                return;
+            }
+            let url = `${scriptURL}?action=search&query=${encodeURIComponent(query)}`;
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    let table = document.getElementById("resultTable");
+                    table.innerHTML = "";
+                    if (data.length === 0) {
+                        Swal.fire("Thông báo", "Không tìm thấy dữ liệu.", "info");
+                        clearInputs(["searchInput"]);
+                        M.updateTextFields();
+                        return;
+                    }
+                    data.forEach(row => {
+                        let tr = document.createElement("tr");
+                        for (let i = 0; i < 4; i++) { // Chỉ lấy 4 cột đầu tiên
+                            let td = document.createElement("td");
+                            td.textContent = row[i];
+                            tr.appendChild(td);
+                        }
+                        table.appendChild(tr);
+                    });
+                    clearInputs(["searchInput"]);
+                    M.updateTextFields();
+                })
+                .catch(error => {
+                    console.error("Lỗi:", error);
+                    Swal.fire("Lỗi", "Đã xảy ra lỗi khi tìm kiếm.", "error");
+                });
+        }
+
+        function logout() {
+            // Xóa thông tin Remember Me và username
+            localStorage.removeItem('username');
+            localStorage.removeItem('rememberMe');
+            sessionStorage.clear();
+            
+            // Chuyển hướng về trang đăng nhập (nếu có)
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>
