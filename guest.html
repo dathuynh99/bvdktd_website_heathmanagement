@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tìm Kiếm Dữ Liệu Sức Khỏe</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <!-- Thư viện Noti đẹp -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <style>
+        body { font-family: 'Roboto', sans-serif; text-align: center; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); }
+
+        table {
+            margin-bottom: 20px;
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+            border-spacing: 0;
+            border-collapse: separate;
+            border-radius: 10px;
+            overflow: hidden; /* Để bo góc hoạt động với bảng */
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* Đổ bóng nhẹ */
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            width: 50%;
+        }
+
+        th {
+            background: linear-gradient(135deg, #4096ec, #66b3ff); /* Hiệu ứng gradient */
+            color: white;
+            text-align: center;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        td {
+            background-color: #f9f9f9; /* Màu nền nhẹ nhàng */
+            border-bottom: 1px solid #ddd; /* Viền dưới nhẹ */
+            color: #333;
+        }
+
+        tr:last-child td {
+            border-bottom: none; /* Loại bỏ viền dưới của hàng cuối */
+        }
+
+        tr:hover td {
+            background-color: #e3f2fd; /* Hiệu ứng hover */
+            transition: background-color 0.3s ease; /* Hiệu ứng chuyển đổi mượt */
+        }
+        
+        .title { font-size: 2rem; font-weight: bold; color: #4096ec; text-transform: uppercase; margin-bottom: 20px; }
+        .striped tbody tr:nth-child(odd) { background-color: #e3f2fd; }
+    </style>
+</head>
+<body>
+
+    <h4 class="title">Tìm Kiếm Dữ Liệu Sức Khỏe</h4>
+    <div class="input-field">
+        <input type="text" id="searchInput">
+        <label for="searchInput">Nhập ID hoặc tên cần tìm</label>
+    </div>
+    <button class="btn blue waves-effect waves-light custom-button" onclick="searchData()">
+        Tìm kiếm
+    </button>
+    <style>
+        .custom-button {
+            border-radius: 7px;
+            padding: 5px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            align-items: center;
+            justify-content: center;
+            height: 45px;
+        }
+    </style>
+    <style>
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
+        }
+        .btn:active {
+            transform: scale(0.95);
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+
+    <table class="striped centered highlight">
+        <thead class="blue white-text">
+            <tr>
+                <th>Thông Tin</th>
+                <th>Giá Trị</th>
+            </tr>
+        </thead>
+        <tbody id="resultTable"></tbody>
+    </table>    
+
+    <script>
+        // Đường dẫn của Google Apps Script
+        const scriptURL = "https://script.google.com/macros/s/AKfycbz_eGXI1hGmeHjtElHxPXzciawj1a9DQkWNL3spjJXr5EDbmTRMm8TQvpnyk2-59vFn/exec";
+
+        function clearInputs(inputs) {
+            inputs.forEach(id => document.getElementById(id).value = "");
+        }
+
+        function searchData() {
+            let query = document.getElementById("searchInput").value.trim();
+            if (!query) {
+                Swal.fire("Lỗi", "Vui lòng nhập ID hoặc tên để tìm kiếm.", "error");
+                return;
+            }
+            let url = `${scriptURL}?action=search&query=${encodeURIComponent(query)}`;
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    let table = document.getElementById("resultTable");
+                    table.innerHTML = ""; // Xóa dữ liệu cũ
+
+                    if (data.length === 0) {
+                        Swal.fire("Thông báo", "Không tìm thấy dữ liệu.", "info");
+                        return;
+                    }
+
+                    let labels = [
+                        "ID", "Họ tên", "Chức Danh Nghề Nghiệp", "Năm Sinh", "SĐT", "Chiều cao",
+                        "Cân nặng", "BMI", "Huyết áp", "Hồng cầu", "Bạch cầu", "Tiểu cầu",
+                        "Glucose", "Ure", "Creatinin", "SGOT (AST)", "SGPT (ALT)"
+                    ];
+
+                    let rowData = data[0]; // Lấy dữ liệu dòng đầu tiên
+
+                    for (let i = 0; i < labels.length; i++) {
+                        let tr = document.createElement("tr");
+
+                        let tdLabel = document.createElement("td");
+                        tdLabel.textContent = labels[i];
+                        tdLabel.style.fontWeight = "bold"; // In đậm nhãn
+
+                        let tdValue = document.createElement("td");
+                        tdValue.textContent = rowData[i] || "Không có dữ liệu";
+
+                        tr.appendChild(tdLabel);
+                        tr.appendChild(tdValue);
+                        table.appendChild(tr);
+                    }
+                    clearInputs(["searchInput"]);
+                    M.updateTextFields();
+                })
+                .catch(error => {
+                    console.error("Lỗi:", error);
+                    Swal.fire("Lỗi", "Đã xảy ra lỗi khi tìm kiếm.", "error");
+                });
+            }
+
+    </script>    
+
+</body>
+</html>
