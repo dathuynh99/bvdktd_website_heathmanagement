@@ -1,42 +1,197 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trang Chủ</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Classy Login Form</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .background-image {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: url('./Black_and_white-updated.jpg') no-repeat center center/cover;
+            opacity : 90%;
+            z-index: 0;
+        }
+
+        .card {
+            position: relative;
+            z-index: 1;
+            padding: 40px;
+            width: 400px;
+            text-align: center;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .input-field {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .input-field input {
+            width: 100%;
+            border: none;
+            border-bottom: 2px solid #ddd;
+            outline: none;
+            font-size: 16px;
+            padding: 10px 0;
+            background: transparent;
+            transition: all 0.3s ease;
+        }
+        .input-field label {
+            position: absolute;
+            left: 0;
+            top: 0px;
+            font-size: 16px;
+            color: #757575;
+            transition: all 0.3s ease;
+        }
+        .input-field input:focus + label,
+        .input-field input:not(:placeholder-shown) + label {
+            top: -20px;
+            font-size: 12px;
+            color: #ec407a;
+        }
+        .input-field input:focus {
+            border-color: #ec407a;
+        }
+        .btn {
+            width: 100%;
+            border-radius: 25px;
+            padding: 12px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .btn.pink {
+            background: #ec407a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .btn.pink:hover {
+            background: #d81b60;
+        }
+        .btn.grey {
+            background: #757575;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .btn.grey:hover {
+            background: #616161;
+        }
+        .btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .buttons {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .classy-login-title {
+            font-family: 'Roboto', sans-serif;
+            font-weight: 700;
+            font-size: 34px;
+            color: #424242;
+        }
+    </style>
 </head>
 <body>
+    <div class="background-image"></div> <!-- Lớp mờ nằm sau khung đăng nhập -->
+    <div class="card">
+        <h4 class="classy-login-title">
+            Classy Login
+        </h4>
+        <div class="input-field">
+            <input type="text" id="username" placeholder=" " required>
+            <label for="username">User name</label>
+        </div>
+        <div class="input-field">
+            <input type="password" id="password" placeholder=" " required>
+            <label for="password">Password</label>
+        </div>
+        <div>
+            <label>
+                <input type="checkbox" id="rememberMe" />
+                <span>Remember me</span>
+            </label>
+        </div>        
 
-    <!-- Navigation Bar -->
-    <div class="navbar">
-        <span class="menu-icon" onclick="openSidebar()">☰</span>
-        <div class="menu">
-            <a href="index.html">🏠 Trang chủ</a>
-            <a href="sanpham.html">Sản phẩm</a>
-            <a href="dichvu.html">Dịch vụ</a>
-            <a href="lienhe.html">Liên hệ</a>
+        <div class="buttons">
+            <button class="btn pink" onclick="handleLogin()">Login</button>
+            <div class="center-align or-divider"><strong>or</strong></div>
+            <button class="btn grey" onclick="handleGuest()">Continue as Guest</button>
         </div>
     </div>
 
-    <!-- Overlay nền mờ -->
-    <div id="overlay" class="overlay" onclick="closeSidebar()"></div>
+    <script>
+        // Kiểm tra nếu đã đăng nhập trước đó
+        document.addEventListener("DOMContentLoaded", function () {
+            var savedUsername = localStorage.getItem("username");
+            if (savedUsername) {
+                window.location.href = "Input_seach_del.html"; // Chuyển hướng nếu đã lưu đăng nhập
+            }
+        });
 
-    <!-- Sidebar -->
-    <div id="mySidebar" class="sidebar">
-        <a href="javascript:void(0)" class="close-btn" onclick="closeSidebar()">✖</a>
-        <a href="index.html">Trang chủ</a>
-        <a href="sanpham.html">Sản phẩm</a>
-        <a href="dichvu.html">Dịch vụ</a>
-        <a href="lienhe.html">Liên hệ</a>
-    </div>
+        function handleLogin() {
+            var username = document.getElementById("username").value;
+            var password = document.getElementById("password").value;
+            var rememberMe = document.getElementById("rememberMe").checked; // Lấy trạng thái checkbox
 
-    <!-- Nội dung -->
-    <div class="content">
-        <h2>Chào mừng bạn đến với trang web!</h2>
-        <p>Chọn một danh mục để khám phá.</p>
-    </div>
+            if (username === "admin" && password === "admin") {
+                if (rememberMe) {
+                    localStorage.setItem("username", username); // Lưu tên đăng nhập nếu chọn Remember Me
+                }
 
-    <script src="script.js"></script>
+                Swal.fire({
+                    title: "Thành công",
+                    text: "Đăng nhập thành công",
+                    icon: "success",
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => {
+                    window.location.href = "Input_seach_del.html";
+                });
+            } else {
+                Swal.fire({
+                    title: "Lỗi",
+                    text: "Thông tin đăng nhập không đúng",
+                    icon: "error",
+                    confirmButtonText: "Thử lại"
+                });
+            }
+        }
+
+        function handleGuest() {
+            Swal.fire({
+                title: "Tiếp tục với tư cách khách",
+                text: "Bạn sẽ được chuyển hướng",
+                icon: "success",
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => {
+                window.location.href = "guest.html";
+            });
+        }
+    </script>
+
 </body>
 </html>
