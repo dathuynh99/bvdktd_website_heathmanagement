@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="vi">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Quản lý dữ liệu</title>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <!-- Thư viện Noti đẹp -->
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+        <style>
+            body { font-family: 'Roboto', sans-serif; text-align: center; padding: 20px; background: #f5f5f5; }
+            .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); }
+            table { width: 100%; margin-top: 20px; }
+            th, td { padding: 10px; text-align: -webkit-match-parent; text-align: match-parent; }
+            .title { font-size: 2rem; font-weight: bold; color: #4096ec; text-transform: uppercase; margin-bottom: 20px; }
+            .striped tbody tr:nth-child(odd) { background-color: #e3f2fd; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h4 class="title">Xóa dữ liệu</h4>
+            <div class="input-field">
+                <input type="number" id="deleteID">
+                <label for="deleteID">Nhập ID cần xóa</label>
+            </div>
+    
+            <table class="striped centered highlight">
+                <thead class="blue white-text">
+                    <tr>
+                        <th>ID</th>
+                        <th>Họ tên</th>
+                        <th>Năm Sinh</th>
+                        <th>SĐT</th>
+                    </tr>
+                </thead>
+                <tbody id="resultTable"></tbody>
+            </table>
+
+            <div style="margin-top: 20px;">
+                <button class="btn red lighten-1 waves-effect waves-light" onclick="deleteData()">Xóa dữ liệu</button>
+            </div>
+        </div>
+
+    <script>
+        let typingTimer;
+        const doneTypingInterval = 200; // 1 giây
+
+        const scriptURL = "https://script.google.com/macros/s/AKfycbz_eGXI1hGmeHjtElHxPXzciawj1a9DQkWNL3spjJXr5EDbmTRMm8TQvpnyk2-59vFn/exec";
+
+        function clearInputs(inputs) {
+            inputs.forEach(id => document.getElementById(id).value = "");
+        }
+
+        function deleteData() {
+            let id = document.getElementById("deleteID").value;
+            if (!id) {
+                Swal.fire("Lỗi", "Vui lòng nhập ID để xóa.", "error");
+                return;
+            }
+            let url = `${scriptURL}?action=delete&id=${encodeURIComponent(id)}`;
+            fetch(url)
+                .then(response => response.text())
+                .then(data => {
+                    Swal.fire({
+                        title: "Bạn có chắc muốn xóa ID này ?",
+                        text: "Sau khi xóa sẽ  không thể khôi phục lại.",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#d33",
+                        cancelButtonColor: "#3085d6",
+                        confirmButtonText: '<span style="display: inline-block; width: 100px;">Tiếp tục</span>',
+                        cancelButtonText: '<span style="display: inline-block; width: 100px;">Hủy</span>'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            Swal.fire("Thông báo", data, "info");
+                            clearInputs(["deleteID"]);
+                            M.updateTextFields();
+                            // Clear the resultTable after deletion
+                            document.getElementById("resultTable").innerHTML = "";
+                        }
+                    });
+                })
+                .catch(error => console.error("Lỗi:", error));
+        }
+
+        function searchData() {
+            let query = document.getElementById("deleteID").value.trim();
+            if (!query) {
+                Swal.fire("Lỗi", "Vui lòng nhập ID hoặc tên để tìm kiếm.", "error");
+                return;
+            }
+            let url = `${scriptURL}?action=search&query=${encodeURIComponent(query)}`;
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    let table = document.getElementById("resultTable");
+                    table.innerHTML = "";
+                    if (data.length === 0) {
+                        Swal.fire("Thông báo", "Không tìm thấy dữ liệu.", "info");
+                        clearInputs(["deleteID"]);
+                        M.updateTextFields();
+                        return;
+                    }
+                    data.forEach(row => {
+                        let tr = document.createElement("tr");
+                        for (let i = 0; i < 4; i++) { // Chỉ lấy 4 cột đầu tiên
+                            let td = document.createElement("td");
+                            td.textContent = row[i];
+                            tr.appendChild(td);
+                        }
+                        table.appendChild(tr);
+                    });
+                })
+                .catch(error => {
+                    console.error("Lỗi:", error);
+                    Swal.fire("Lỗi", "Đã xảy ra lỗi khi tìm kiếm.", "error");
+                });
+        }
+
+        document.getElementById("deleteID").addEventListener("input", function () {
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(() => {
+                searchData(); // Gọi hàm searchData() khi ngừng nhập
+            }, doneTypingInterval);
+        });
+
+    </script>
+</body>
+</html>
