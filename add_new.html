@@ -72,7 +72,16 @@
                     }
                 </style>
                 <div class="input-field col s4">
-                    <input type="text" id="bmi" readonly>
+                    <input type="text" id="bmi" 
+                        readonly
+                        onblur="
+                        if (this.value.includes('.')) {
+                            this.value = this.value.replace('.', ',');
+                        } else if (this.value && !this.value.includes(',')) { 
+                            this.value += ',0'; 
+                        } else if (this.value.endsWith(',')) { 
+                            this.value += '0'; 
+                        }">
                     <label for="bmi">BMI</label>
                 </div>
             </div>
