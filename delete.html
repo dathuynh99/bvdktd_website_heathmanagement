@@ -58,7 +58,7 @@
                 Swal.fire("Lỗi", "Vui lòng nhập ID để xóa.", "error");
                 return;
             }
-            let url = `${scriptURL}?action=delete&id=${encodeURIComponent(id)}`;
+            let url = `${scriptURL}?action=deleteuser&id=${encodeURIComponent(id)}`;
             fetch(url)
                 .then(response => response.text())
                 .then(data => {
@@ -90,7 +90,7 @@
                 Swal.fire("Lỗi", "Vui lòng nhập ID hoặc tên để tìm kiếm.", "error");
                 return;
             }
-            let url = `${scriptURL}?action=search&query=${encodeURIComponent(query)}`;
+            let url = `${scriptURL}?action=searchuser&query=${encodeURIComponent(query)}`;
             fetch(url)
                 .then(response => response.json())
                 .then(data => {
