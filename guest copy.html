@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tìm Kiếm Dữ Liệu Sức Khỏe</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <!-- Thư viện Noti đẹp -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <style>
+        body { font-family: 'Roboto', sans-serif; text-align: center; padding: 20px 100px; background: #f5f5f5; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); }
+
+        table {
+            margin-bottom: 20px;
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+            border-spacing: 0;
+            border-collapse: separate;
+            border-radius: 10px;
+            overflow: hidden; /* Để bo góc hoạt động với bảng */
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* Đổ bóng nhẹ */
+            margin-left: auto; /* Canh giữa bảng */
+            margin-right: auto; /* Canh giữa bảng */
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            width: 50%;
+        }
+
+        th {
+            background: linear-gradient(135deg, #4096ec, #66b3ff); /* Hiệu ứng gradient */
+            color: white;
+            text-align: center;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        td {
+            background-color: #f9f9f9; /* Màu nền nhẹ nhàng */
+            border-bottom: 1px solid #ddd; /* Viền dưới nhẹ */
+            color: #333;
+        }
+
+        tr:last-child td {
+            border-bottom: none; /* Loại bỏ viền dưới của hàng cuối */
+        }
+
+        tr:hover td {
+            background-color: #e3f2fd; /* Hiệu ứng hover */
+            transition: background-color 0.3s ease; /* Hiệu ứng chuyển đổi mượt */
+        }
+        
+        .title { font-size: 2rem; font-weight: bold; color: #4096ec; text-transform: uppercase; margin-bottom: 20px; }
+        .striped tbody tr:nth-child(odd) { background-color: #e3f2fd; }
+    </style>
+</head>
+<body>
+
+    <h4 class="title">Tìm Kiếm Dữ Liệu Sức Khỏe</h4>
+    <div class="input-field">
+        <input type="text" id="searchInput" 
+            oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 12);" 
+            onblur="if (this.value.length === 12) { 
+            }else{
+                Swal.fire('Lỗi', 'Vui lòng kiểm tra lại định dạng số CCCD', 'error');
+            }">
+        <label for="searchInput">Nhập CCCD cần tìm</label>
+    </div>
+    <button class="btn blue waves-effect waves-light custom-button" onclick="searchData()">
+        Tìm kiếm
+    </button>
+    <style>
+        .custom-button {
+            border-radius: 7px;
+            padding: 5px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            align-items: center;
+            justify-content: center;
+            height: 45px;
+        }
+    </style>
+    <style>
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
+        }
+        .btn:active {
+            transform: scale(0.95);
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .chisocao-highlight::before {
+            content: "";
+            display: inline-block;
+            position: absolute;
+            top: 5px;
+            bottom: 5px;
+            left: 70px;
+            right: 70px;
+            border: 3px solid red;
+            border-radius: 6px;
+            pointer-events: none;
+        }
+        .chisocao-highlight {
+            position: relative;
+            font-weight: bold;
+            color: red;
+        }
+
+        .chisothap-highlight::before {
+            content: "";
+            display: inline-block;
+            position: absolute;
+            top: 5px;
+            bottom: 5px;
+            left: 80px;
+            right: 80px;
+            border: 3px solid yellow;
+            border-radius: 6px;
+            pointer-events: none;
+        }
+        .chisothap-highlight {
+            position: relative;
+            font-weight: bold;
+            color: rgb(38, 78, 34);
+        }
+    </style>
+
+    <table class="striped centered highlight">
+        <thead class="blue white-text">
+            <tr>
+                <th>Thông Tin</th>
+                <th>Giá Trị</th>
+            </tr>
+        </thead>
+        <tbody id="resultTable"></tbody>
+    </table>    
+
+    <div id="adviceBox" style="display: none; margin-top: 20px; border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); background: #f9f9f9;">
+        <h3 style="margin-top: 0; font-size: 20px; color: #333;">🩺 Đánh giá sức khỏe</h3>
+        <ul id="adviceList" style="list-style: none; padding-left: 0; margin: 0;"></ul>
+    </div>
+      
+    <script>
+        // Đường dẫn của Google Apps Script
+        const scriptURL = "https://script.google.com/macros/s/AKfycbz_eGXI1hGmeHjtElHxPXzciawj1a9DQkWNL3spjJXr5EDbmTRMm8TQvpnyk2-59vFn/exec";
+
+        function clearInputs(inputs) {
+            inputs.forEach(id => document.getElementById(id).value = "");
+        }
+
+        function searchData() {
+            const adviceBox = document.getElementById("adviceBox");
+            const adviceList = document.getElementById("adviceList");
+            adviceList.innerHTML = ""; // Xoá nội dung cũ
+            adviceBox.style.display = "block"; // Hiện hộp khuyến nghị
+
+            let query = document.getElementById("searchInput").value.trim().replace(/^0+/, '');
+            if (!query) {
+                Swal.fire("Lỗi", "Vui lòng nhập CCCD tìm kiếm.", "error");
+                return;
+            }
+            let url = `${scriptURL}?action=searchuser&query=${encodeURIComponent(query)}`;
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    let table = document.getElementById("resultTable");
+                    table.innerHTML = ""; // Xóa dữ liệu cũ
+
+                    if (data.length === 0) {
+                        Swal.fire("Thông báo", "Không tìm thấy dữ liệu.", "info");
+                        return;
+                    }
+
+                    let labels = [
+                        "ID", "Họ tên", "Khoa Phòng", "Chức Danh Nghề Nghiệp", "Năm Sinh", "SĐT", "CCCD", "Chiều cao",
+                        "Cân nặng", "BMI", "Huyết áp", "Hồng cầu", "Bạch cầu","Tiểu cầu", "Glucose", "Ure", "Creatinin",
+                        "SGOT (AST)","SGPT (ALT)", "Đánh giá BMI", "Đánh giá Huyết áp", "Đánh giá Hồng cầu", "Đánh giá Tiểu cầu",
+                        "Đánh giá Glucose", "Đánh giá Ure", "Đánh giá Creatinin", "Đánh giá SGOT", "Đánh giá SGPT"
+                    ];
+
+                    let rowData = data[0]; // Lấy dữ liệu dòng đầu tiên
+
+                    let nhanxet_bmi = ""; let nhanxet_huyetap = ""; let nhanxet_hongcau = ""; 
+                    let nhanxet_bachcau = ""; let nhanxet_tieucau = ""; let nhanxet_glucose = ""; 
+                    let nhanxet_ure = ""; let nhanxet_creatinin = ""; let nhanxet_sgot = ""; 
+                    let nhanxet_sgpt = "";
+
+                    for (let i = 1; i < labels.length; i++) {
+
+                        if(i <= 18) { }
+                        else
+                        {
+                            const bmiMapping = {
+                                "High": "Thừa cân",
+                                "Low": "Thiếu cân",
+                                "BT": "BT"
+                            };
+                            nhanxet_bmi = bmiMapping[rowData[19]] || "Không xác định";
+                            
+                            const huyetapMapping = {
+                                "High": "Huyết áp cao",
+                                "Low": "Huyết áp thấp",
+                                "BT": "BT"
+                            };
+                            nhanxet_huyetap = huyetapMapping[rowData[20]] || "Không xác định";
+
+                            const bachcauMapping = {
+                                "High": "Bạch cầu cao",
+                                "Low": "Bạch cầu thấp",
+                                "BT": "BT"
+                            };
+                            nhanxet_bachcau = bachcauMapping[rowData[21]] || "Không xác định";
+
+                            const hongcauMapping = {
+                                "High": "Hồng cầu cao",
+                                "Low": "Hồng cầu thấp",
+                                "BT": "BT"
+                            };
+                            nhanxet_hongcau = hongcauMapping[rowData[22]] || "Không xác định";
+
+                            const tieucauMapping = {
+                                "High": "Tiểu cầu cao",
+                                "Low": "Tiểu cầu thấp",
+                                "BT": "BT"
+                            };
+                            nhanxet_tieucau = tieucauMapping[rowData[23]] || "Không xác định";
+
+                            const glucoseMapping = {
+                                "High": "Đường huyết cao",
+                                "Low": "Đường huyết thấp",
+                                "BT": "BT"
+                            };
+                            nhanxet_glucose = glucoseMapping[rowData[24]] || "Không xác định";
+
+                            const ureMapping = {
+                                "High": "Ure cao",
+                                "Low": "Ure thấp",
+                                "BT": "BT"
+                            };
+                            nhanxet_ure = ureMapping[rowData[25]] || "Không xác định";
+                            
+                            const creatininMapping = {
+                                "High": "Creatinin cao",
+                                "Low": "Creatinin thấp",
+                                "BT": "BT"
+                            };
+                            nhanxet_creatinin = creatininMapping[rowData[26]] || "Không xác định";
+                            
+                            const sgotMapping = {
+                                "High": "SGOT cao",
+                                "Low": "SGOT thấp",
+                                "BT": "BT"
+                            };
+                            nhanxet_sgot = sgotMapping[rowData[27]] || "Không xác định";
+                            
+                            const sgptMapping = {
+                                "High": "SGPT cao",
+                                "Low": "SGPT thấp",
+                                "BT": "BT"
+                            };
+                            nhanxet_sgpt = sgptMapping[rowData[28]] || "Không xác định";
+                        }
+
+                    }
+
+                    console.log(nhanxet_bmi);
+                    console.log(nhanxet_huyetap);
+                    console.log(nhanxet_hongcau);
+                    console.log(nhanxet_bachcau);
+                    console.log(nhanxet_tieucau);
+                    console.log(nhanxet_glucose);
+                    console.log(nhanxet_ure);
+                    console.log(nhanxet_creatinin);
+                    console.log(nhanxet_sgot);
+                    console.log(nhanxet_sgpt);
+
+                    for (let i = 1; i < labels.length; i++) {
+                        let tr = document.createElement("tr");
+
+                        let tdLabel = document.createElement("td");
+                        tdLabel.textContent = labels[i];
+                        tdLabel.style.fontWeight = "bold"; // In đậm nhãn
+
+                        if(i <= 18)
+                        {
+                            let tdValue = document.createElement("td");
+                            if (i === 5 || i === 6) {
+                                tdValue.textContent = rowData[i] ? `0${rowData[i]}` : "Không có dữ liệu";
+                            } else if (i ===9 ) {
+                                tdValue.textContent = rowData[i] || "Không có dữ liệu";
+                                if (nhanxet_bmi === "Thừa cân") {
+                                    // tdValue.style.color = "red";
+                                    // tdValue.style.fontWeight = "bold";
+                                    tdValue.classList.add("chisocao-highlight");
+                                    addAdvice("⚠️", "Bạn thừa cân. Hãy tập thể dục đều đặn và ăn uống lành mạnh.", "#e65100");
+                                } else if (nhanxet_bmi === "Thiếu cân") {
+                                    tdValue.classList.add("chisothap-highlight");
+                                    addAdvice("🍽️", "Bạn thiếu cân. Nên bổ sung dinh dưỡng đầy đủ.", "#0277bd");;
+                                }else if (nhanxet_bmi === "BT") {
+                                    addAdvice("✅", "BMI của bạn cân đối. Hãy duy trì chế độ sinh hoạt tốt!", "#2e7d32");
+                                } 
+                            } else if(i === 10) {
+                                tdValue.textContent = rowData[i] || "Không có dữ liệu";
+                                if (nhanxet_huyetap === "Huyết áp cao") {
+                                    tdValue.classList.add("chisocao-highlight");
+                                    addAdvice("🩸", "Huyết áp cao. Hạn chế muối, stress và theo dõi sức khỏe thường xuyên.", "#b71c1c");
+                                } else if (nhanxet_huyetap === "Huyết áp thấp") {
+                                    tdValue.classList.add("chisothap-highlight");
+                                    addAdvice("🩸", "Huyết áp thấp. Nên ăn đủ, uống nước và không nên đứng dậy quá nhanh.", "#0d47a1");
+                                }else if (nhanxet_huyetap === "BT") {
+                                    addAdvice("🫀", "Huyết áp bạn ổn định. Tiếp tục duy trì lối sống lành mạnh.", "#2e7d32");
+                                } 
+                            } else if (i === 11) {
+                                tdValue.textContent = rowData[i] || "Không có dữ liệu";
+
+                                if (nhanxet_hongcau === "Bạch cầu cao") {
+                                    tdValue.classList.add("chisocao-highlight");
+                                    addAdvice("⚠️", "Bạch cầu của bạn cao. Hãy kiểm tra sức khỏe thường xuyên.", "#e65100");
+                                } else if (nhanxet_hongcau === "Bạch cầu thấp") {
+                                    tdValue.classList.add("chisothap-highlight");
+                                    addAdvice("💧", "Bạch cầu của bạn thấp. Hãy uống đủ nước và nghỉ ngơi.", "#0277bd");
+                                }else if (nhanxet_hongcau === "BT") {
+                                    // addAdvice("✅", "Bạch cầu của bạn bình thường. Hãy duy trì chế độ sinh hoạt tốt!", "#2e7d32");
+                                } 
+                            } else {
+                                tdValue.textContent = rowData[i] || "Không có dữ liệu";
+                                
+                            }
+
+                            tr.appendChild(tdLabel);
+                            tr.appendChild(tdValue);
+                            table.appendChild(tr);
+                            
+                        }
+                        else
+                        { }
+
+                    }
+
+                    clearInputs(["searchInput"]);
+
+                    M.updateTextFields();
+                })
+                .catch(error => {
+                    console.error("Lỗi:", error);
+                    Swal.fire("Lỗi", "Đã xảy ra lỗi khi tìm kiếm.", "error");
+                });
+            }
+
+        // Hàm thêm dòng khuyến nghị
+        function addAdvice(icon, text, color) {
+            const li = document.createElement("li");
+            li.innerHTML = `<span style="font-size: 20px; margin-right: 8px;">${icon}</span><span style="color: ${color}; font-size: 16px;">${text}</span>`;
+            adviceList.appendChild(li);
+        }
+
+    </script>    
+
+</body>
+</html>

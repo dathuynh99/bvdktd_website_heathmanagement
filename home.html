@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Page</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            display: flex;
+            flex-direction: row;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: #f4f4f9;
+        }
+        .navbar {
+            width: 100%;
+            background: #25a171;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 50px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        .nav-left {
+            display: flex;
+            align-items: center;
+        }
+        .nav-right {
+            display: flex;
+            align-items: center;
+        }
+        .toggle-btn {
+            background: #fcfdfd;
+            color: rgb(253, 0, 0);
+            border: none;
+            padding: 10px 14px;
+            cursor: pointer;
+            font-size: 18px;
+            border-radius: 5px;
+            transition: background 0.3s;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+            margin-right: 20px;
+        }
+        .toggle-btn:hover {
+            background: #1f906a;
+        }
+        .home-btn {
+            background: #ffffff;
+            color: rgb(233, 23, 23);
+            border: none;
+            padding: 10px 14px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+            transition: background 0.3s;
+            margin-left: 10px;
+	        margin-right: 40px;
+        }
+        .home-btn:hover {
+            background: #1f906a;
+        }
+        .date-display {
+            margin-right: 10px;
+            font-size: 16px;
+        }
+        .sidebar {
+            width: 80px;
+            background: #25a171;
+            color: white;
+            padding-top: 20px;
+            position: fixed;
+            left: 0;
+            top: 50px;
+            bottom: 0;
+            transition: width 0.5s;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .sidebar.expanded {
+            width: 253px;
+        }
+        .sidebar ul {
+            padding: 0;
+            list-style: none;
+            flex-grow: 1;
+        }
+        .sidebar ul li, .logout {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            transition: background 0.5s transform 0.7s;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            width: 1000%;
+        }
+        .sidebar ul li i, .logout i {
+            font-size: 20px;
+            width: 40px;
+            text-align: center;
+        }
+        .sidebar ul li span, .logout span {
+            display: inline-block;
+            opacity: 0;
+            transform: translateX(80px);
+            transition: opacity 0.3s, transform 0.5s;
+            white-space: nowrap;
+        }
+        .sidebar.expanded ul li span, .sidebar.expanded .logout span {
+            opacity: 1;
+            transform: translateX(0);
+            margin-left: 10px;
+            transition: opacity 0.2s, transform 0.4s;
+        }
+        .sidebar ul li:hover {
+            background: #1f906a;
+            border-radius: 5px;
+        }
+        .logout {
+            background: #be5545;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+        }
+        .logout:hover {
+            background: #a53f35;
+        }
+        .content {
+            flex: 1;
+            padding: 80px 40px 40px 80px;
+            transition: margin-left 0.7s;
+            margin-left: 30px;
+        }
+        .sidebar.expanded ~ .content {
+            margin-left: 210px;
+        }
+
+        .nav-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+        .search-container {
+            display: flex;
+            align-items: center;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 5px;
+            transition: all 0.3s ease-in-out;
+            width: 50%;
+        }
+        .search-bar {
+            flex: 1;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 20px;
+            font-size: 16px;
+            background: transparent;
+            outline: none;
+            transition: all 0.3s ease-in-out;
+        }
+        .search-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            font-size: 18px;
+            color: #888;
+            transition: all 0.3s ease-in-out;
+        }
+        .search-container:focus-within {
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+            background-color: #f1f1f1;
+            transform: scale(1.05);
+        }
+        .search-container:focus-within .search-btn {
+            color: #000;
+            transform: scale(1.1);
+        }
+        .search-dropdown {
+            position: absolute;
+            top: calc(100% + 5px);
+            width: 100%;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            list-style: none;
+            padding: 10px 0;
+            margin: 0;
+            display: none;
+            z-index: 1000;
+            overflow: hidden;
+        }
+        .search-dropdown li {
+            padding: 12px 15px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 14px;
+            color: #333;
+        }
+        .search-dropdown li:hover {
+            background: #f0f0f0;
+        }
+        .search-dropdown li:first-child {
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+        .search-dropdown li:last-child {
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+
+        /* Style cho modal (pop-up) */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            width: 300px;
+            text-align: center;
+        }
+        .modal .close {
+            cursor: pointer;
+            color: red;
+            font-size: 18px;
+        }
+
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="navbar">
+        <div class="nav-left">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div style="display: flex; flex-direction: column; align-items: left; gap: 5px;">
+                <span style="font-size: 16px; color: rgb(241, 244, 252);"><b>BỆNH VIỆN ĐA KHOA KHA VẠN CÂN</b></span>
+                <span style="font-size: 12px; color: rgb(213, 221, 241);"><b>HỆ THỐNG QUẢN LÝ DỮ LIỆU SỨC KHỎE NHÂN VIÊN</b></span>
+            </div>
+        </div>
+        <div class="nav-center">
+            <div class="search-container">
+                <input type="text" class="search-bar" placeholder="Tìm kiếm dữ liệu" oninput="searchData(this.value)">
+                <button class="search-btn" title="Search"><i class="fas fa-search search-icon"></i></button>
+                <ul class="search-dropdown" id="searchResults"></ul>
+            </div>
+        </div>
+        <div class="nav-right">
+            <span class="date-display" id="dateDisplay"></span>
+            <button class="home-btn" type="button" title="Go to Home Page" onclick="goHome()"><i class="fas fa-home"></i></button>
+        </div>
+    </div>
+    <div class="sidebar" id="sidebar">
+        <ul>
+            <li onclick="window.location.href='add_new.html'">
+                <i class="fas fa-plus"style="margin-left: 10px;"></i></i><span> Thêm dữ liệu mới</span>
+            </li>
+            <li onclick="window.location.href='edit.html'">
+                <i class="fas fa-edit"style="margin-left: 10px;"></i></i><span> Sửa dữ liệu</span>
+            </li>
+            <li onclick="window.location.href='delete.html'">
+                <i class="fas fa-trash"style="margin-left: 10px;"></i></i><span> Xóa dữ liệu</span>
+            </li>
+            <li onclick="window.location.href='add_limit.html'">
+                <i class="fas fa-ruler-combined"style="margin-left: 10px;"></i></i><span> Sửa ngưỡng chuẩn</span>
+            </li>
+        </ul>
+        <div class="logout">
+            <i class="fas fa-sign-out-alt" style="margin-left: 10px;"></i><span> Đăng xuất</span>
+        </div>
+    </div>
+    <div class="content" id="content">
+        <h1>Welcome to the Home Page</h1>
+        <p>Enjoy a clean and elegant sidebar navigation experience.</p>
+    </div>
+    <script>
+
+        const scriptURL_admin = "https://script.google.com/macros/s/AKfycbxIR-l6b23tkC3iYOd-36WBhJTx8qb7vpPkD__csaFi35POgGMCh0x8NzrniVf2KXcJ_w/exec";
+
+        function saveDefaultData() {
+            let bmimin = 18.5.toString().replace('.', ',');
+            let bmimax = 24.9.toString().replace('.', ',');
+            let bloodpressuremin = "90/60";
+            let bloodpressuremax = "139/85";
+            let whitebloodcellmin = 3.9.toString().replace('.', ',');
+            let whitebloodcellmax = 10.9.toString().replace('.', ',');
+            let redbloodcellmin = 4.2.toString().replace('.', ',');
+            let redbloodcellmax = 6.1.toString().replace('.', ',');
+            let plateletmin = 150;
+            let plateletmax = 450;
+            let Glucosemin = 3.9.toString().replace('.', ',');
+            let Glucosemax = 5.6.toString().replace('.', ',');
+            let Uremin = 2.5.toString().replace('.', ',');
+            let Uremax = 7.5.toString().replace('.', ',');
+            let Creatininmin = 61.9.toString().replace('.', ',');
+            let Creatininmax = 114.9.toString().replace('.', ',');
+            let SGOTmin = 0.1.toString().replace('.', ',');
+            let SGOTmax = 39.9.toString().replace('.', ',');
+            let SGPTmin = 0.1.toString().replace('.', ',');
+            let SGPTmax = 39.9.toString().replace('.', ',');
+
+            let url = `${scriptURL_admin}?action=savedefalutdata` +
+                      `&bmimin=${encodeURIComponent(bmimin)}` +
+                      `&bmimax=${encodeURIComponent(bmimax)}` +
+                      `&bloodpressuremin=${encodeURIComponent(bloodpressuremin)}` +
+                      `&bloodpressuremax=${encodeURIComponent(bloodpressuremax)}` +
+                      `&whitebloodcellmin=${encodeURIComponent(whitebloodcellmin)}` +
+                      `&whitebloodcellmax=${encodeURIComponent(whitebloodcellmax)}` +
+                      `&redbloodcellmin=${encodeURIComponent(redbloodcellmin)}` +
+                      `&redbloodcellmax=${encodeURIComponent(redbloodcellmax)}` +
+                      `&plateletmin=${encodeURIComponent(plateletmin)}` +
+                      `&plateletmax=${encodeURIComponent(plateletmax)}` +
+                      `&Glucosemin=${encodeURIComponent(Glucosemin)}` +
+                      `&Glucosemax=${encodeURIComponent(Glucosemax)}` +
+                      `&Uremin=${encodeURIComponent(Uremin)}` +
+                      `&Uremax=${encodeURIComponent(Uremax)}` +
+                      `&Creatininmin=${encodeURIComponent(Creatininmin)}` +
+                      `&Creatininmax=${encodeURIComponent(Creatininmax)}` +
+                      `&SGOTmin=${encodeURIComponent(SGOTmin)}` +
+                      `&SGOTmax=${encodeURIComponent(SGOTmax)}` +
+                      `&SGPTmin=${encodeURIComponent(SGPTmin)}` +
+                      `&SGPTmax=${encodeURIComponent(SGPTmax)}`;
+
+            fetch(url)
+                .then(response => response.text())
+                .then(data => {
+                    // M.updateTextFields();
+                    // Hiển thị thông báo ở một vụ trí cố định trên web
+                    // document.getElementById("result").innerHTML = data;
+                })
+                .catch(error => console.error("Lỗi:", error));
+        }
+
+        saveDefaultData();
+
+        function clearInputs(inputs) {
+            inputs.forEach(id => document.getElementById(id).value = "");
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('expanded');
+        }
+        
+        function goHome() {
+            window.location.href = 'home.html';
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelector(".logout").addEventListener("click", function() {
+                Swal.fire({
+                    title: "Bạn có chắc muốn đăng xuất?",
+                    text: "Bạn sẽ được chuyển đến trang đăng nhập.",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: '<span style="display: inline-block; width: 100px;">Đăng xuất</span>',
+                    cancelButtonText: '<span style="display: inline-block; width: 100px;">Hủy</span>'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: "Đăng xuất thành công",
+                            text: "Bạn sẽ được chuyển hướng",
+                            icon: "success",
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            localStorage.removeItem('username');
+                            localStorage.removeItem('rememberMe');
+                            sessionStorage.clear();
+                            window.location.assign('index.html');
+                        });
+                    }
+                });
+            });
+        });
+        
+        function updateDate() {
+            const dateElement = document.getElementById('dateDisplay');
+            const now = new Date();
+            const formattedDate = now.getDate().toString().padStart(2, '0') + '/' +
+                                  (now.getMonth() + 1).toString().padStart(2, '0') + '/' +
+                                  now.getFullYear();
+            dateElement.textContent = formattedDate;
+        }
+
+        updateDate();
+
+        function searchData(query) {
+            const searchResults = document.getElementById("searchResults");
+            searchResults.innerHTML = ""; // Xóa kết quả cũ
+            searchResults.style.display = "block"; // Đảm bảo danh sách hiển thị đúng
+
+            if (query.trim() === "") {
+                searchResults.style.display = "none";
+                return;
+            }
+
+            // Dữ liệu mẫu
+            const data = [
+                { name: "Bệnh án", details: "Thông tin bệnh án của bệnh nhân." },
+                { name: "Bác sĩ", details: "Danh sách bác sĩ chuyên khoa." },
+                { name: "Nhân viên", details: "Danh sách nhân viên y tế." },
+                { name: "Lịch hẹn", details: "Danh sách các lịch hẹn khám bệnh." },
+                { name: "Kết quả xét nghiệm", details: "Thông tin chi tiết về xét nghiệm." }
+            ];
+
+            const filtered = data.filter(item => item.name.toLowerCase().includes(query.toLowerCase()));
+
+            if (filtered.length > 0) {
+                filtered.forEach(item => {
+                    const li = document.createElement("li");
+                    li.textContent = item.name;
+                    li.onclick = () => {
+                        document.querySelector(".search-bar").value = item.name;
+                        searchResults.style.display = "none";
+                        showPopup(item.name, item.details);
+                    };
+                    searchResults.appendChild(li);
+                });
+            } else {
+                const li = document.createElement("li");
+                li.textContent = "Không tìm thấy kết quả";
+                li.onclick = () => {
+                    document.querySelector(".search-bar").value = "Không tìm thấy kết quả";
+                    searchResults.style.display = "none";
+                    showPopup("Không tìm thấy kết quả", " ");
+                };
+                searchResults.appendChild(li);
+            }
+
+            // Đảm bảo danh sách không mở rộng
+            // searchResults.style.maxWidth = "300px";
+            // searchResults.style.overflow = "hidden";
+        }
+        
+        function showPopup(title, content) {
+            Swal.fire({
+                title: title,
+                text: content,
+                icon: "info",
+                confirmButtonText: "Đóng",
+                width: '400px', // Giữ kích thước popup cố định
+                backdrop: false, // Tắt nền mờ toàn màn hình
+                allowOutsideClick: false // Ngăn click bên ngoài để đóng popup
+            });
+        }
+
+
+    </script>
+</body>
+</html>
