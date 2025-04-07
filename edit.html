@@ -20,10 +20,19 @@
 
         <style>
             body { font-family: 'Roboto', sans-serif; text-align: center; padding: 20px; background: #f5f5f5; }
-            .edit-container { max-width: 800px; margin: 80px auto 0; background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);  
-                transition: margin-left 0.7s;
-                margin-left: calc(50% - 400px); }
-            .sidebar.expanded ~ .edit-container { margin-left: calc(50% - 400px + 126.5px); }
+            .delete-container { 
+                max-width: 800px; 
+                margin: 80px auto 0; 
+                background: white; 
+                padding: 20px; 
+                border-radius: 10px; 
+                box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); 
+                transition: margin-left 0.7s; 
+                margin-left: calc(50% - 400px); /* Center horizontally, considering max-width */
+            }
+            .sidebar.expanded ~ .delete-container { 
+                margin-left: calc(50% - 400px + 126.5px); /* Adjust for expanded sidebar width */
+            }
             table { width: 100%; margin-top: 20px; }
             th, td { padding: 10px; text-align: -webkit-match-parent; text-align: match-parent; }
             .title { font-size: 2rem; font-weight: bold; color: #4096ec; text-transform: uppercase; margin-bottom: 20px; }
@@ -76,11 +85,11 @@
                 50% {
                     transform: translate(-50%, 60px); /* Chữ nhún lên một chút */
                 }
-            }  
+            }
 
 /* ------------------------------------------------------------------------------------------------------------- */
 
-.navbar {
+        .navbar {
             width: 100%;
             background: #25a171;
             color: white;
@@ -292,9 +301,7 @@
 
         </style>
     </head>
-
     <body>
-<!-- /* ------------------------------------------------------------------------------------------------------------- */ -->
         <div class="navbar">
             <div class="nav-left">
                 <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
@@ -337,572 +344,115 @@
 
 <!-- /* ------------------------------------------------------------------------------------------------------------- */ -->
 
-        <div class="edit-container">
-            <h4 class="title">Tìm kiếm thông tin nhân viên cần sửa</h4>
+        <div class="delete-container">
+            <h4 class="title">Xóa dữ liệu</h4>
             <div class="input-field">
-                <input type="text" id="searchInput" 
+                <input type="text" id="deleteID" 
                     oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 12);" 
                     onblur="if (this.value.length === 12) { 
                     }else{
                         Swal.fire('Lỗi', 'Vui lòng kiểm tra lại định dạng số CCCD', 'error');
                     }">
-                <label for="searchInput">Nhập CCCD cần tìm</label>
-            </div>
-            <div class="row" style="display: flex; justify-content: space-between; gap: 15px; margin-top: 30px;">
-                <button class="btn orange waves-effect waves-light" style="flex: 1;" onclick="fetchEditData()"><b>Tìm thông tin</b></button>
-            </div>
-
-            <h4 class="title">Chỉnh sửa thông tin</h4>
-            <!-- Thông tin cá nhân cơ bản -->
-            <div class="row">
-                <div class="input-field col s4">
-                    <input type="text" id="name" oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ỹ\s]/g, '')">
-                    <label for="name">Họ và tên</label> 
-                </div>
-                <div class="input-field col s4">
-                    <select id="position">
-                        <option value="" disabled selected>Chọn Khoa Phòng</option>
-                        <option value="Ban Giám đốc">Ban Giám đốc</option>
-                        <option value="Khoa Cấp cứu">Khoa Cấp cứu</option>
-                        <option value="Khoa Chẩn đoán hình ảnh">Khoa Chẩn đoán hình ảnh</option>
-                        <option value="Khoa Chấn thương chỉnh hình">Khoa Chấn thương chỉnh hình</option>
-                        <option value="Khoa Dinh dưỡng">Khoa Dinh dưỡng</option>
-                        <option value="Khoa Dược">Khoa Dược</option>
-                        <option value="Khoa Gây mê hồi sức">Khoa Gây mê hồi sức</option>
-                        <option value="Khoa Hồi sức tích cực và chống độc">Khoa Hồi sức tích cực và chống độc</option>
-                        <option value="Khoa Kiểm soát nhiễm khuẩn">Khoa Kiểm soát nhiễm khuẩn</option>
-                        <option value="Khoa Khám bệnh">Khoa Khám bệnh</option>
-                        <option value="Khoa Mắt">Khoa Mắt</option>
-                        <option value="Khoa Nội tiết">Khoa Nội tiết</option>
-                        <option value="Khoa Nội tiêu hóa">Khoa Nội tiêu hóa</option>
-                        <option value="Khoa Nội Tim Mạch">Khoa Nội Tim Mạch</option>
-                        <option value="Khoa Nội tổng hợp">Khoa Nội tổng hợp</option>
-                        <option value="Khoa Nội thần kinh">Khoa Nội thần kinh</option>
-                        <option value="Khoa Nội thận-Tiết niệu">Khoa Nội thận-Tiết niệu</option>
-                        <option value="Khoa Ngoại tiết niệu">Khoa Ngoại tiết niệu</option>
-                        <option value="Khoa Ngoại tổng hợp">Khoa Ngoại tổng hợp</option>
-                        <option value="Khoa Ngoại thần kinh">Khoa Ngoại thần kinh</option>
-                        <option value="Khoa Nhi">Khoa Nhi</option>
-                        <option value="Khoa Nhiễm">Khoa Nhiễm</option>
-                        <option value="Khoa Phục hồi chức năng">Khoa Phục hồi chức năng</option>
-                        <option value="Khoa Răng Hàm Mặt">Khoa Răng Hàm Mặt</option>
-                        <option value="Khoa Sản">Khoa Sản</option>
-                        <option value="Khoa Tai Mũi Họng">Khoa Tai Mũi Họng</option>
-                        <option value="Khoa Tim mạch can thiệp">Khoa Tim mạch can thiệp</option>
-                        <option value="Khoa Xét nghiệm">Khoa Xét nghiệm</option>
-                        <option value="Khoa Y học cổ truyền">Khoa Y học cổ truyền</option>
-                        <option value="Phòng Công nghệ thông tin">Phòng Công nghệ thông tin</option>
-                        <option value="Phòng Công tác xã hội">Phòng Công tác xã hội</option>
-                        <option value="Phòng Điều dưỡng">Phòng Điều dưỡng</option>
-                        <option value="Phòng Hành chính quản trị">Phòng Hành chính quản trị</option>
-                        <option value="Phòng Kế hoạch tổng hợp">Phòng Kế hoạch tổng hợp</option>
-                        <option value="Phòng Quản lý chất lượng">Phòng Quản lý chất lượng</option>
-                        <option value="Phòng Tài chính kế toán">Phòng Tài chính kế toán</option>
-                        <option value="Phòng Tổ chức cán bộ">Phòng Tổ chức cán bộ</option>
-                        <option value="Phòng Vật tư, trang thiết bị y tế">Phòng Vật tư, trang thiết bị y tế</option>
-                    </select>
-                    <label for="position">Khoa Phòng</label>
-                </div>
-                <div class="input-field col s4">
-                    <input type="text" id="jobtitle" oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ỹ\s]/g, '')">
-                    <label for="jobtitle">Chức danh nghề nghiệp</label>
-                </div>
-            </div>
-            <div class="row">
-                <div class="input-field col s4">
-                    <input type="number" id="age" oninput="this.value = this.value.slice(0, 4);" 
-                    onblur="if (this.value.length < 4 || (this.value.length === 4 && (this.value < 1900 || this.value > 2099))) { 
-                        Swal.fire('Lỗi', 'Năm sinh không hợp lệ. Vui lòng kiểm tra lại.', 'error'); 
-                    }">
-                    <label for="age">Năm sinh</label>
-                </div>
-                <div class="input-field col s4">
-                    <input type="number" id="phone" oninput="this.value = this.value.slice(0, 10);" 
-                    onblur="if (this.value.length < 10 || this.value.length > 11) {
-                        Swal.fire('Lỗi', 'Vui lòng kiểm tra lại số điện thoại', 'error');
-                    }">
-                    <label for="phone">Số điện thoại</label>
-                </div>
-                <div class="input-field col s4">
-                    <input type="number" id="CCCD" oninput="this.value = this.value.slice(0, 12);" 
-                    onblur="
-                    if (this.value.length === 12) {
-                        checkCCCDAvailableYet();
-                        if(CCCDisexsist) 
-                        {
-                            this.value = '0' + inputCCCDcurrent;
-                            M.updateTextFields();
-                        } else { }
-                    } else {
-                        Swal.fire('Lỗi', 'Vui lòng kiểm tra lại định dạng số CCCD', 'error');
-                        this.value = inputCCCDcurrent;
-                    }">
-                    <label for="CCCD">Số Căn Cước</label>
-                </div>
-            </div>
-            <!-- Chỉ số sức khỏe (Chiều cao) (Cân nặng) (BMI) -->
-            <div class="row">
-                <div class="input-field col s4 custom-height">
-                    <input type="text" id="height" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="flex-input">
-                    <label for="height">Chiều cao</label>
-                    <span class="unit-label">cm</span>
-                </div>
-                <style>
-                    .custom-height{
-                        display: flex; 
-                        align-items: center;
-                    }
-                </style>
-                <div class="input-field col s4 custom-wweight">
-                    <input type="text" id="weight" oninput="this.value = this.value.replace(/[^0-9]/g, ''); calculateBMI();">
-                    <label for="weight">Cân nặng</label>
-                    <span class="unit-label">kg</span>
-                </div>
-                <style>
-                    .custom-wweight{
-                        display: flex; 
-                        align-items: center;
-                    }
-                </style>
-                <div class="input-field col s4">
-                    <input type="text" id="bmi" readonly>
-                    <label for="bmi">BMI</label>
-                </div>
-            </div>
-            <!-- Chỉ số xét nghiệm (Huyết Áp) (Glucose) (Ure) (Creatinin) -->
-            <div class="row">
-                <div class="input-field col s3">
-                    <input type="number" id="systolic" oninput="this.value = this.value.slice(0, 3); updateBloodPressure();">
-                    <label for="systolic">Huyết áp Tâm thu</label>
-                </div>
-                <div class="input-field col s1">
-                    <span style="font-size: x-large; font-weight: bolder;">/</span>
-                </div>               
-                <div class="input-field col s3">
-                    <input type="number" id="diastolic" oninput="this.value = this.value.slice(0, 3); updateBloodPressure();">
-                    <label for="diastolic">Huyết áp Tâm trương</label>
-                </div>
-                <div class="input-field col s5" style="display: flex; align-items: center;">
-                    <input type="text" id="bloodpressure" readonly style="flex: 1;">
-                    <label for="bloodpressure">Huyết áp (Tâm thu / Tâm trương)</label>
-                    <span style="margin-left: 8px;">mmHg</span>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="input-field col s4 align-center">
-                    <input type="text" id="whitebloodcell" 
-                        oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" 
-                        onblur="
-                            if (this.value.includes('.')) {
-                                this.value = this.value.replace('.', ',');
-                            } else if (this.value && !this.value.includes(',')) { 
-                                this.value += ',0'; 
-                            } else if (this.value.endsWith(',')) { 
-                                this.value += '0'; 
-                            }">
-                    <label for="whitebloodcell">Bạch Cầu</label>
-                </div>
-                <div class="input-field col s4 align-center">
-                    <input type="text" id="redbloodcell" 
-                            oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" 
-                            onblur="
-                            if (this.value.includes('.')) {
-                                this.value = this.value.replace('.', ',');
-                            } else if (this.value && !this.value.includes(',')) { 
-                                this.value += ',0'; 
-                            } else if (this.value.endsWith(',')) { 
-                                this.value += '0'; 
-                            }">
-                    <label for="redbloodcell">Hồng Cầu</label>
-                </div>
-                <div class="input-field col s4 align-center">
-                    <input type="number" id="platelet" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-                    <label for="platelet">Tiểu Cầu</label>
-                </div>
-            </div>
-            <div class="row">
-                <div class="input-field col s4 align-center">
-                    <input type="text" id="Glucose" 
-                        oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" 
-                        onblur="
-                            if (this.value.includes('.')) {
-                                this.value = this.value.replace('.', ',');
-                            } else if (this.value && !this.value.includes(',')) { 
-                                this.value += ',0'; 
-                            } else if (this.value.endsWith(',')) { 
-                                this.value += '0'; 
-                            }">
-                    <label for="Glucose">Glucose</label>
-                </div>
-                <div class="input-field col s4 align-center">
-                    <input type="text" id="Ure" 
-                        oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" 
-                        onblur="
-                            if (this.value.includes('.')) {
-                                this.value = this.value.replace('.', ',');
-                            } else if (this.value && !this.value.includes(',')) { 
-                                this.value += ',0'; 
-                            } else if (this.value.endsWith(',')) { 
-                                this.value += '0'; 
-                            }">
-                    <label for="Ure">Ure</label>
-                </div>
-                <div class="input-field col s4 align-center">
-                    <input type="text" id="Creatinin" 
-                        oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" 
-                        onblur="
-                            if (this.value.includes('.')) {
-                                this.value = this.value.replace('.', ',');
-                            } else if (this.value && !this.value.includes(',')) { 
-                                this.value += ',0'; 
-                            } else if (this.value.endsWith(',')) { 
-                                this.value += '0'; 
-                            }">
-                    <label for="Creatinin">Creatinin</label>
-                </div>
-            </div>
-            <div class="row">
-                <div class="input-field col s6 align-center">
-                    <input type="text" id="SGOT" 
-                        oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" 
-                        onblur="
-                            if (this.value.includes('.')) {
-                                this.value = this.value.replace('.', ',');
-                            } else if (this.value && !this.value.includes(',')) { 
-                                this.value += ',0'; 
-                            } else if (this.value.endsWith(',')) { 
-                                this.value += '0'; 
-                            }">
-                    <label for="SGOT">SGOT (AST)</label>
-                </div>
-                <div class="input-field col s6 align-center">
-                    <input type="text" id="SGPT" 
-                        oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" 
-                        onblur="
-                            if (this.value.includes('.')) {
-                                this.value = this.value.replace('.', ',');
-                            } else if (this.value && !this.value.includes(',')) { 
-                                this.value += ',0'; 
-                            } else if (this.value.endsWith(',')) { 
-                                this.value += '0'; 
-                            }">
-                    <label for="SGPT">SGPT (ALT)</label>
-                </div>
-            </div>
-            <div class="row" style="display: flex; justify-content: space-between; gap: 15px; margin-top: 30px;">
-                <button class="btn green waves-effect waves-light" style="flex: 1;" onclick="updateData()"><b>Cập nhật</b></button>
+                <label for="deleteID">Nhập CCCD cần tìm</label>
             </div>
     
+            <table class="striped centered highlight">
+                <thead class="blue white-text">
+                    <tr>
+                        <th>Họ tên</th>
+                        <th>Khoa Phòng</th>
+                        <th>Chức danh nghề nghiệp</th>
+                        <th>Năm sinh</th>
+                        <th>SĐT</th>
+                        <th>CCCD</th>
+                    </tr>
+                </thead>
+                <tbody id="resultTable"></tbody>
+            </table>
+
+            <div class="row" style="display: flex; justify-content: space-between; gap: 15px; margin-top: 30px;">
+                <button class="btn waves-effect waves-light green darken" style="flex: 1;" onclick="searchData()"><b>Load Dữ Liệu</b></button>
+                <button class="btn red lighten-1 waves-effect waves-light" style="flex: 1;" onclick="deleteData()"><b>Xóa dữ liệu</b></button>
+            </div>
         </div>
 
     <script>
         const scriptURL = "https://script.google.com/macros/s/AKfycbz_eGXI1hGmeHjtElHxPXzciawj1a9DQkWNL3spjJXr5EDbmTRMm8TQvpnyk2-59vFn/exec";
-        const scriptURL_nguong = "https://script.google.com/macros/s/AKfycbxIR-l6b23tkC3iYOd-36WBhJTx8qb7vpPkD__csaFi35POgGMCh0x8NzrniVf2KXcJ_w/exec";
 
-// Hàm tính năng chính
-
-        // Biến global để lưu dữ liệu ID
-        let globalID = ""; 
-
-        // Biến toàn cục để theo dõi trạng thái của CCCD
-        let CCCDisexsist = false; 
-
-        // Biến để lưu giá trị CCCD hiện tại
-        let inputCCCDcurrent = ""; 
-
-        // Biến để lưu giá trị CCCD mới
-        let inputCCCDnew = ""; 
-
-        // Khai báo các biến để lưu giá trị 
-        //      Min                          Max                         Đánh giá
-        let bmimin = "";            let bmimax = "";            let danhgia_bmi = "";
-        let bloodpressuremin = "";  let bloodpressuremax = "";  let danhgia_bloodpressure = "";
-        let whitebloodcellmin = ""; let whitebloodcellmax = ""; let danhgia_whitebloodcell = "";
-        let redbloodcellmin = "";   let redbloodcellmax = "";   let danhgia_redbloodcell = "";
-        let plateletmin = "";       let plateletmax = "";       let danhgia_platelet = "";
-        let Glucosemin = "";        let Glucosemax = "";        let danhgia_Glucose = "";
-        let Uremin = "";            let Uremax = "";            let danhgia_Ure = "";
-        let Creatininmin = "";      let Creatininmax = "";      let danhgia_Creatinin = "";
-        let SGOTmin = "";           let SGOTmax = "";           let danhgia_SGOT = "";
-        let SGPTmin = "";           let SGPTmax = "";           let danhgia_SGPT = "";
-
-        function getAllCCCDToArray() {
-
-            showLoading(); // Hiện spinner và chữ "Đang load dữ liệu"
-
-            let url = `${scriptURL}?action=checkcheckcccdavailable`;
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    window.dataArray = data; // Lưu dữ liệu vào biến toàn cục
-                    console.log("---------------------------------------------");
-                    console.log("Dữ liệu từ Google Sheets:", data);
-                    hideLoading(); // Ẩn spinner và chữ "Đang load dữ liệu"
-                })
-                .catch(error => {
-                    console.error("Lỗi:", error);
-                    Swal.fire("Lỗi", "Không thể tải dữ liệu CCCD hiện có. CCCD có thể trùng", "error");
-                    hideLoading(); // Ẩn spinner và chữ "Đang load dữ liệu"
-                });
+        function clearInputs(inputs) {
+            inputs.forEach(id => document.getElementById(id).value = "");
         }
 
-        // Gọi hàm để lấy dữ liệu từ Google Sheets khi trang được tải
-        getAllCCCDToArray();
-        getGiaTriNguong(); 
-        
-        function fetchEditData() {
-            // document.body.classList.add("loading"); // Khóa thao tác
-            showLoading(); // Hiện spinner và chữ "Đang load dữ liệu"
-            let query = document.getElementById("searchInput").value.trim().replace(/^0+/, '');
-            if (!query) {
-                clearInputs(["name", "jobtitle", "age", "phone", "CCCD", "height", "weight", "bmi",
-                        "bloodpressure", "whitebloodcell", "redbloodcell", "platelet",
-                        "Glucose", "Ure", "Creatinin", "SGOT", "SGPT", "systolic", "diastolic"]);
-                        
-                const positionSelect = document.getElementById("position");
-                positionSelect.value = ""; // Reset select input for position to default
-                const defaultOption = positionSelect.querySelector('option[disabled][selected]');
-                if (defaultOption) {
-                    defaultOption.selected = true; // Ensure the default option is selected
-                }
-                M.FormSelect.init(positionSelect); // Reinitialize Materialize select UI for the position element
-
-                M.updateTextFields(); // Cập nhật giao diện Materialize
-                Swal.fire("Lỗi", "Vui lòng nhập CCCD để tìm kiếm.", "error");
-                hideLoading(); // Ẩn spinner và chữ "Đang load dữ liệu"
+        function deleteData() {
+            let id = document.getElementById("deleteID").value.trim().replace(/^0+/, '');
+            if (!id) {
+                Swal.fire("Lỗi", "Vui lòng nhập ID để xóa.", "error");
                 return;
             }
-            let url = `${scriptURL}?action=searchuser&query=${encodeURIComponent(query)}`;
 
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                if (data.length === 0) {
-                    Swal.fire("Thông báo", "Không tìm thấy dữ liệu.", "info");
-                    // clearInputs(["searchInput"]);
-                    clearInputs(["searchInput", "name", "jobtitle", "age", "phone", "CCCD", "height", "weight", "bmi",
-                            "bloodpressure", "whitebloodcell", "redbloodcell", "platelet",
-                            "Glucose", "Ure", "Creatinin", "SGOT", "SGPT", "systolic", "diastolic"]);
-
-                    const positionSelect = document.getElementById("position");
-                    positionSelect.value = ""; // Reset select input for position to default
-                    const defaultOption = positionSelect.querySelector('option[disabled][selected]');
-                    if (defaultOption) {
-                        defaultOption.selected = true; // Ensure the default option is selected
-                    }
-                    M.FormSelect.init(positionSelect); // Reinitialize Materialize select UI for the position element
-
-                    M.updateTextFields(); // Cập nhật giao diện Materialize
-                    hideLoading(); // Ẩn spinner và chữ "Đang load dữ liệu"
-                    return;
+            Swal.fire({
+                title: "Bạn có chắc muốn xóa ID này ?",
+                text: "Sau khi xóa sẽ  không thể khôi phục lại.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: '<span style="display: inline-block; width: 100px;">Tiếp tục</span>',
+                cancelButtonText: '<span style="display: inline-block; width: 100px;">Hủy</span>'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let url = `${scriptURL}?action=deleteuser&id=${encodeURIComponent(id)}`;
+                    fetch(url)
+                        .then(response => response.text())
+                        .then(data => {
+                            Swal.fire("Thông báo", data, "info");
+                            clearInputs(["deleteID"]);
+                            M.updateTextFields();
+                            // Clear the resultTable after deletion
+                            document.getElementById("resultTable").innerHTML = "";
+                        })
+                        .catch(error => console.error("Lỗi:", error));
                 }
-                
-                let userData = data[0];
-                // document.getElementById("ID").value = userData[0];
-                globalID = userData[0]; // Lưu ID vào biến globalID
-                document.getElementById("name").value = userData[1];
-
-                const positionSelect = document.getElementById("position");
-                const positionValue = userData[2];
-                const options = Array.from(positionSelect.options);
-                const matchingOption = options.find(option => option.value === positionValue);
-                if (matchingOption) {
-                    positionSelect.value = positionValue;
-                    M.FormSelect.init(positionSelect); // Cập nhật giao diện Materialize
-                }
-
-                document.getElementById("jobtitle").value = userData[3]
-                document.getElementById("age").value = userData[4];
-                document.getElementById("phone").value = "0" + userData[5];
-                document.getElementById("CCCD").value = "0" + userData[6];
-                document.getElementById("height").value = userData[7];
-                document.getElementById("weight").value = userData[8];
-                document.getElementById("bmi").value = userData[9].toString().replace('.', ',');
-
-                document.getElementById("bloodpressure").value = userData[10];
-                const bloodPressure = userData[10].split('/');
-                document.getElementById("systolic").value = bloodPressure[0].trim();
-                document.getElementById("diastolic").value = bloodPressure[1].trim();
-
-                document.getElementById("whitebloodcell").value = userData[11].toString().replace('.', ',');
-                document.getElementById("redbloodcell").value = userData[12].toString().replace('.', ',');
-                document.getElementById("platelet").value = userData[13];
-                document.getElementById("Glucose").value = userData[14].toString().replace('.', ',');
-                document.getElementById("Ure").value = userData[15].toString().replace('.', ',');
-                document.getElementById("Creatinin").value = userData[16].toString().replace('.', ',');
-                document.getElementById("SGOT").value = userData[17].toString().replace('.', ',');
-                document.getElementById("SGPT").value = userData[18].toString().replace('.', ',');
-
-                inputCCCDcurrent = document.getElementById("searchInput").value.trim().replace(/^0+/, '');
-                console.log("Input CCCD current:", inputCCCDcurrent);
-                clearInputs(["searchInput"]);
-                M.updateTextFields(); // Cập nhật giao diện Materialize
-                hideLoading(); // Ẩn spinner và chữ "Đang load dữ liệu"
-            })
-            .catch(error => {
-                console.error("Lỗi:", error);
-                Swal.fire("Lỗi", "Đã xảy ra lỗi khi tìm kiếm.", "error");
-                hideLoading(); // Ẩn spinner và chữ "Đang load dữ liệu"
             });
         }
 
-        function updateBloodPressure() {
-            const systolic = document.getElementById("systolic").value;
-            const diastolic = document.getElementById("diastolic").value;
-            const bloodpressure = systolic && diastolic ? `${systolic}/${diastolic}` : "";
-            document.getElementById("bloodpressure").value = bloodpressure;
-            M.updateTextFields();
-        }
-        
-        function updateData() {
-
-            let editID = globalID; // Sử dụng biến globalID đã lưu ID
-            console.log("---------------------------------------------");
-            console.log("Current globalID:", globalID);
-
-            const fields = [
-                "name", "position", "jobtitle", "age", "phone", "CCCD", "height", "weight", "bmi", 
-                "bloodpressure", "whitebloodcell", "redbloodcell", "platelet", 
-                "Glucose", "Ure", "Creatinin", "SGOT", "SGPT"
-            ];
-            const [
-                name, position, jobtitle, age, phone, CCCD, height, weight, bmi, 
-                bloodpressure, whitebloodcell, redbloodcell, platelet, 
-                Glucose, Ure, Creatinin, SGOT, SGPT
-            ] = fields.map(id => document.getElementById(id).value.trim());
-            
-            if (!name.trim() || !position.trim()  || !jobtitle.trim() || !age.trim() || !phone.trim() || !CCCD.trim() || !height.trim() || !weight.trim() 
-                    || !bmi.trim() || !weight.trim() || !bmi.trim()|| !bloodpressure.trim() || !whitebloodcell.trim()|| !redbloodcell.trim()
-                    || !platelet.trim() || !Glucose.trim() || !Ure.trim() || !Creatinin.trim() || !SGOT.trim() || !SGPT.trim()) {
-                    Swal.fire("Lỗi", "Vui lòng nhập đầy đủ thông tin.", "error");
-                    return;
+        function searchData() {
+            let query = document.getElementById("deleteID").value.trim().replace(/^0+/, '');
+            if (!query) {
+                Swal.fire("Lỗi", "Vui lòng nhập ID hoặc tên để tìm kiếm.", "error");
+                return;
             }
-
-            const logFields = [
-                { label: "BMI", value: bmi },
-                { label: "Blood Pressure", value: bloodpressure },
-                { label: "White Blood Cell", value: whitebloodcell },
-                { label: "Red Blood Cell", value: redbloodcell },
-                { label: "Platelet", value: platelet },
-                { label: "Glucose", value: Glucose },
-                { label: "Ure", value: Ure },
-                { label: "Creatinin", value: Creatinin },
-                { label: "SGOT", value: SGOT },
-                { label: "SGPT", value: SGPT }
-            ];
-
-            logFields.forEach(field => console.log(`${field.label}:`, field.value));
-
-            danhgia_bmi            = (parseFloat(bmi.replace(',', '.')) < parseFloat(bmimin.replace(',', '.'))) ? "Low" :
-                                        (parseFloat(bmi.replace(',', '.')) > parseFloat(bmimax.replace(',', '.'))) ? "High" : "BT";
-
-            danhgia_whitebloodcell = (parseFloat(whitebloodcell.replace(',', '.')) < parseFloat(whitebloodcellmin.replace(',', '.'))) ? "Low" :
-                                        (parseFloat(whitebloodcell.replace(',', '.')) > parseFloat(whitebloodcellmax.replace(',', '.'))) ? "High" : "BT";
-
-            danhgia_redbloodcell   = (parseFloat(redbloodcell.replace(',', '.')) < parseFloat(redbloodcellmin.replace(',', '.'))) ? "Low" :
-                                        (parseFloat(redbloodcell.replace(',', '.')) > parseFloat(redbloodcellmax.replace(',', '.'))) ? "High" : "BT";
-
-            danhgia_platelet       = (parseFloat(platelet) < parseFloat(plateletmin)) ? "Low" :
-                                        (parseFloat(platelet) > parseFloat(plateletmax)) ? "High" : "BT";
-
-            danhgia_Glucose        = (parseFloat(Glucose.replace(',', '.')) < parseFloat(Glucosemin.replace(',', '.'))) ? "Low" :
-                                        (parseFloat(Glucose.replace(',', '.')) > parseFloat(Glucosemax.replace(',', '.'))) ? "High" : "BT";
-
-            danhgia_Ure            = (parseFloat(Ure.replace(',', '.')) < parseFloat(Uremin.replace(',', '.'))) ? "Low" :
-                                        (parseFloat(Ure.replace(',', '.')) > parseFloat(Uremax.replace(',', '.'))) ? "High" : "BT";
-
-            danhgia_Creatinin      = (parseFloat(Creatinin.replace(',', '.')) < parseFloat(Creatininmin.replace(',', '.'))) ? "Low" :
-                                        (parseFloat(Creatinin.replace(',', '.')) > parseFloat(Creatininmax.replace(',', '.'))) ? "High" : "BT";
-
-            danhgia_SGOT           = (parseFloat(SGOT.replace(',', '.')) < parseFloat(SGOTmin.replace(',', '.'))) ? "Low" :
-                                        (parseFloat(SGOT.replace(',', '.')) > parseFloat(SGOTmax.replace(',', '.'))) ? "High" : "BT";
-
-            danhgia_SGPT           = (parseFloat(SGPT.replace(',', '.')) < parseFloat(SGPTmin.replace(',', '.'))) ? "Low" :
-                                        (parseFloat(SGPT.replace(',', '.')) > parseFloat(SGPTmax.replace(',', '.'))) ? "High" : "BT";
-
-            // Đánh giá huyết áp
-            const [systolic, diastolic] = bloodpressure.replace(',', '.').split('/').map(parseFloat);
-            const [systolicMin, diastolicMin] = bloodpressuremin.replace(',', '.').split('/').map(parseFloat);
-            const [systolicMax, diastolicMax] = bloodpressuremax.replace(',', '.').split('/').map(parseFloat);
-
-            if (systolic < systolicMin || diastolic < diastolicMin) {
-                danhgia_bloodpressure = "Low".toString();
-            } else if (systolic > systolicMax || diastolic > diastolicMax) {
-                danhgia_bloodpressure = "High".toString();
-            } else if ((systolic > systolicMax && diastolic < diastolicMin) || (systolic < systolicMin && diastolic > diastolicMax)) {
-                danhgia_bloodpressure = "Inconsistent".toString();
-            } else {
-                danhgia_bloodpressure = "BT".toString();
-            }
-            
-            let url = `${scriptURL}?action=updateuser` +
-                    `&id=${encodeURIComponent(editID)}` +
-                    `&name=${encodeURIComponent(name)}` +
-                    `&position=${encodeURIComponent(position)}` +
-                    `&jobtitle=${encodeURIComponent(jobtitle)}` +
-                    `&age=${encodeURIComponent(age)}` +
-                    `&phone=${encodeURIComponent(phone)}` +
-                    `&CCCD=${encodeURIComponent(CCCD)}` +
-                    `&height=${encodeURIComponent(height)}` +
-                    `&weight=${encodeURIComponent(weight)}` +
-                    `&bmi=${encodeURIComponent(bmi)}` +
-                    `&bloodpressure=${encodeURIComponent(bloodpressure)}` +
-                    `&whitebloodcell=${encodeURIComponent(whitebloodcell)}` +
-                    `&redbloodcell=${encodeURIComponent(redbloodcell)}` +
-                    `&platelet=${encodeURIComponent(platelet)}` +
-                    `&Glucose=${encodeURIComponent(Glucose)}` +
-                    `&Ure=${encodeURIComponent(Ure)}` +
-                    `&Creatinin=${encodeURIComponent(Creatinin)}` +
-                    `&SGOT=${encodeURIComponent(SGOT)}` +
-                    `&SGPT=${encodeURIComponent(SGPT)}` +
-                    `&danhgia_bmi=${encodeURIComponent(danhgia_bmi)}` +
-                    `&danhgia_bloodpressure=${encodeURIComponent(danhgia_bloodpressure)}` +
-                    `&danhgia_whitebloodcell=${encodeURIComponent(danhgia_whitebloodcell)}` +
-                    `&danhgia_redbloodcell=${encodeURIComponent(danhgia_redbloodcell)}` +
-                    `&danhgia_platelet=${encodeURIComponent(danhgia_platelet)}` +
-                    `&danhgia_Glucose=${encodeURIComponent(danhgia_Glucose)}` +
-                    `&danhgia_Ure=${encodeURIComponent(danhgia_Ure)}` +
-                    `&danhgia_Creatinin=${encodeURIComponent(danhgia_Creatinin)}` +
-                    `&danhgia_SGOT=${encodeURIComponent(danhgia_SGOT)}` +
-                    `&danhgia_SGPT=${encodeURIComponent(danhgia_SGPT)}`;
-                    
+            showLoading(); // Hiện spinner và chữ "Đang load dữ liệu"
+            let url = `${scriptURL}?action=searchuser&query=${encodeURIComponent(query)}`;
             fetch(url)
-                .then(response => response.text())
+                .then(response => response.json())
                 .then(data => {
-                    Swal.fire("Thành công", data, "success");
-                    clearInputs(["name", "jobtitle", "age", "phone", "CCCD", "height", "weight", "bmi",
-                        "bloodpressure", "whitebloodcell", "redbloodcell", "platelet",
-                        "Glucose", "Ure", "Creatinin", "SGOT", "SGPT", "systolic", "diastolic"]);
-
-                    const positionSelect = document.getElementById("position");
-                    positionSelect.value = ""; // Reset select input for position to default
-                    const defaultOption = positionSelect.querySelector('option[disabled][selected]');
-                    if (defaultOption) {
-                        defaultOption.selected = true; // Ensure the default option is selected
+                    let table = document.getElementById("resultTable");
+                    table.innerHTML = "";
+                    if (data.length === 0) {
+                        Swal.fire("Thông báo", "Không tìm thấy dữ liệu.", "info");
+                        hideLoading(); // Ẩn spinner và chữ "Đang load dữ liệu"
+                        clearInputs(["deleteID"]);
+                        M.updateTextFields();
+                        return;
                     }
-                    M.FormSelect.init(positionSelect); // Reinitialize Materialize select UI for the position element
-                    
-                    console.log("---------------------------------------------");
-                    console.log("Evaluations:");
-                    console.log("danhgia_bmi:", danhgia_bmi);
-                    console.log("danhgia_bloodpressure:", danhgia_bloodpressure);
-                    console.log("danhgia_whitebloodcell:", danhgia_whitebloodcell);
-                    console.log("danhgia_redbloodcell:", danhgia_redbloodcell);
-                    console.log("danhgia_platelet:", danhgia_platelet);
-                    console.log("danhgia_Glucose:", danhgia_Glucose);
-                    console.log("danhgia_Ure:", danhgia_Ure);
-                    console.log("danhgia_Creatinin:", danhgia_Creatinin);
-                    console.log("danhgia_SGOT:", danhgia_SGOT);
-                    console.log("danhgia_SGPT:", danhgia_SGPT);
-
-                    M.updateTextFields(); // Cập nhật giao diện Materialize
+                    data.forEach(row => {
+                        let tr = document.createElement("tr");
+                        for (let i = 1; i < 7; i++) { // Chỉ lấy 4 cột đầu tiên
+                            let td = document.createElement("td");
+                            td.textContent = row[i];
+                            tr.appendChild(td);
+                        }
+                        table.appendChild(tr);
+                        hideLoading(); // Ẩn spinner và chữ "Đang load dữ liệu"
+                    });
                 })
-                .catch(error => console.error("Lỗi:", error));
-
-                globalID = ""; // Biến global để lưu dữ liệu ID
-                console.log("Current globalID_after:", globalID);
-            }
+                .catch(error => {
+                    console.error("Lỗi:", error);
+                    hideLoading(); // Ẩn spinner và chữ "Đang load dữ liệu"
+                    Swal.fire("Lỗi", "Đã xảy ra lỗi khi tìm kiếm.", "error");
+                });
+        }
 
 // Hàm support giao diện
 
@@ -942,111 +492,6 @@
             
             // Xóa lớp loading khỏi body để cho phép thao tác
             document.body.classList.remove("loading");
-        }
-
-// Hàm support tính năng
-
-        function clearInputs(inputs) {
-            inputs.forEach(id => document.getElementById(id).value = "");
-        }
-
-        function calculateBMI() {
-            const height = parseFloat(document.getElementById("height").value) / 100; // Convert cm to meters
-            const weight = parseFloat(document.getElementById("weight").value);
-            if (height > 0 && weight > 0) {
-                const bmi = (weight / (height * height)).toFixed(2).replace('.', ',');
-                document.getElementById("bmi").value = bmi;
-            } else {
-                document.getElementById("bmi").value = "";
-            }
-        }
-        document.getElementById("height").addEventListener("input", calculateBMI);
-
-        document.addEventListener('DOMContentLoaded', function() {
-            var elems = document.querySelectorAll('select');
-            M.FormSelect.init(elems);
-        });
-
-        function checkCCCDAvailableYet() {
-            
-            inputCCCDnew = document.getElementById("CCCD").value.trim().replace(/^0+/, '');
-            console.log("Input CCCD new:", inputCCCDnew);
-
-            if (!window.dataArray || window.dataArray.length === 0) {
-                Swal.fire("Lỗi", "Dữ liệu chưa được tải, vui lòng thử lại.", "error");
-                return;
-            }
-
-            // Chuyển tất cả dữ liệu trong Google Sheets thành chuỗi để so sánh chính xác
-            let normalizedData = window.dataArray.map(item => item.toString().trim());
-
-            if (inputCCCDcurrent === inputCCCDnew) {}
-            else
-            {
-                if (normalizedData.includes(inputCCCDnew)) {
-                    CCCDisexsist = true;
-                    Swal.fire("Thông báo", "Số CCCD này đã có trên hệ thống", "error");
-                } else {
-                    CCCDisexsist = false;
-                    // Swal.fire("Thông báo", "Giá trị này chưa có trong Google Sheets.", "info");
-                }
-            }
-        }
-
-        function getGiaTriNguong() {
-        let url_nguong = `${scriptURL_nguong}?action=fetchdata`;
-            fetch(url_nguong)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.length === 0) {
-                        Swal.fire("Thông báo", "Không tìm thấy dữ liệu.", "info");
-                        M.updateTextFields();
-                        return;
-                    }
-
-                    let userData = data[0];
-                    bmimin = userData[0].toString().replace('.', ',');
-                    bmimax = userData[1].toString().replace('.', ',');
-                    bloodpressuremin = userData[2];
-                    bloodpressuremax = userData[3];
-                    whitebloodcellmin = userData[4].toString().replace('.', ',');
-                    whitebloodcellmax = userData[5].toString().replace('.', ',');
-                    redbloodcellmin = userData[6].toString().replace('.', ',');
-                    redbloodcellmax = userData[7].toString().replace('.', ',');
-                    plateletmin = userData[8];
-                    plateletmax = userData[9];
-                    Glucosemin = userData[10].toString().replace('.', ',');
-                    Glucosemax = userData[11].toString().replace('.', ',');
-                    Uremin = userData[12].toString().replace('.', ',');
-                    Uremax = userData[13].toString().replace('.', ',');
-                    Creatininmin = userData[14].toString().replace('.', ',');
-                    Creatininmax = userData[15].toString().replace('.', ',');
-                    SGOTmin = userData[16].toString().replace('.', ',');
-                    SGOTmax = userData[17].toString().replace('.', ',');
-                    SGPTmin = userData[18].toString().replace('.', ',');
-                    SGPTmax = userData[19].toString().replace('.', ',');
-
-                    const logValues = {
-                        bmimin, bmimax, bloodpressuremin, bloodpressuremax,
-                        whitebloodcellmin, whitebloodcellmax, redbloodcellmin, redbloodcellmax,
-                        plateletmin, plateletmax, Glucosemin, Glucosemax,
-                        Uremin, Uremax, Creatininmin, Creatininmax,
-                        SGOTmin, SGOTmax, SGPTmin, SGPTmax
-                    };
-
-                    console.log("---------------------------------------------");
-                    console.log("Min/Max Values:");
-                    for (const [key, value] of Object.entries(logValues)) {
-                        const maxKey = key.endsWith("min") ? key.replace("min", "max") : null;
-                        if (maxKey && logValues[maxKey]) {
-                            console.log(`${key}: ${value}, ${maxKey}: ${logValues[maxKey]}`);
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.error("Lỗi:", error);
-                    Swal.fire("Lỗi", "Đã xảy ra lỗi khi đánh giá sức khỏe.", "error");
-                });
         }
 
 // Các hàm giao diện Home
