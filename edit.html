@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="vi">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Quản lý dữ liệu</title>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <!-- Thư viện Noti đẹp -->
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <!-- Thêm Chart.js từ CDN (nếu bạn vẫn sử dụng biểu đồ khác) -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <!-- Thêm Mermaid.js để vẽ lưu đồ -->
+        <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+        <!-- Load Google Charts -->
+        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+        <style>
+            body { font-family: 'Roboto', sans-serif; text-align: center; padding: 20px; background: #f5f5f5; }
+            .edit-container { max-width: 800px; margin: 80px auto 0; background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);  
+                transition: margin-left 0.7s;
+                margin-left: 320px; }
+            .sidebar.expanded ~ .edit-container { margin-left: 380px; }
+            table { width: 100%; margin-top: 20px; }
+            th, td { padding: 10px; text-align: -webkit-match-parent; text-align: match-parent; }
+            .title { font-size: 2rem; font-weight: bold; color: #4096ec; text-transform: uppercase; margin-bottom: 20px; }
+            .striped tbody tr:nth-child(odd) { background-color: #e3f2fd; }
+
+/* ------------------------------------------------------------------------------------------------------------- */
+
+            /* Chặn thao tác ban đầu */
+            body.loading {
+                pointer-events: none; /* Chặn click, nhập liệu */
+                opacity: 0.5; /* Làm mờ trang để báo hiệu đang tải */
+            }
+
+            /* Thiết kế spinner */
+            .loading-spinner {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                border: 4px solid #f3f3f3;
+                border-top: 4px solid #3498db;
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                animation: spin 1s linear infinite;
+            }
+
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+
+            /* Hiệu ứng cho chữ "Đang load dữ liệu" */
+            .loading-text {
+                position: fixed;
+                top: 50%;
+                left: 51%;
+                transform: translate(-50%, 50px); /* Đặt chữ bên dưới spinner */
+                font-size: 18px;
+                font-weight: bold;
+                color: #3498db;
+                animation: bounce 1.5s infinite;
+            }
+
+            /* Hiệu ứng cho chữ bouncinh (nhún lên xuống) */
+            @keyframes bounce {
+                0%, 100% {
+                    transform: translate(-50%, 50px); /* Vị trí ban đầu */
+                }
+                50% {
+                    transform: translate(-50%, 60px); /* Chữ nhún lên một chút */
+                }
+            }  
+
+/* ------------------------------------------------------------------------------------------------------------- */
+
+.navbar {
+            width: 100%;
+            background: #25a171;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 80px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        .nav-left {
+            display: flex;
+            align-items: center;
+        }
+        .nav-right {
+            display: flex;
+            align-items: center;
+        }
+        .toggle-btn {
+            background: #fcfdfd;
+            color: rgb(253, 0, 0);
+            border: none;
+            padding: 10px 14px;
+            cursor: pointer;
+            width: 44.17px;
+            height: 44px;
+            font-size: 18px;
+            border-radius: 5px;
+            transition: background 0.3s;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+            margin-right: 20px;
+        }
+        .toggle-btn:hover {
+            background: #1f906a;
+        }
+        .home-btn {
+            background: #ffffff;
+            color: rgb(233, 23, 23);
+            border: none;
+            width: 46px;
+            height: 38px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+            transition: background 0.3s;
+            margin-left: 10px;
+            /* margin-right: 8px; */
+        }
+        .home-btn:hover {
+            background: #1f906a;
+        }
+        .date-display {
+            margin-right: 10px;
+            font-size: 16px;
+        }
+        .sidebar {
+            width: 80px;
+            background: #25a171;
+            color: white;
+            padding-top: 20px;
+            position: fixed;
+            left: 0;
+            top: 50px;
+            bottom: 0;
+            transition: width 0.5s;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .sidebar.expanded {
+            width: 253px;
+        }
+        .sidebar ul {
+            padding: 0;
+            list-style: none;
+            flex-grow: 1;
+        }
+        .sidebar ul li, .logout {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            transition: background 0.5s transform 0.7s;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            width: 1000%;
+        }
+        .sidebar ul li i, .logout i {
+            font-size: 20px;
+            width: 40px;
+            text-align: center;
+        }
+        .sidebar ul li span, .logout span {
+            display: inline-block;
+            opacity: 0;
+            transform: translateX(80px);
+            transition: opacity 0.3s, transform 0.5s;
+            white-space: nowrap;
+        }
+        .sidebar.expanded ul li span, .sidebar.expanded .logout span {
+            opacity: 1;
+            transform: translateX(0);
+            margin-left: 10px;
+            transition: opacity 0.2s, transform 0.4s;
+        }
+        .sidebar ul li:hover {
+            background: #1f906a;
+            border-radius: 5px;
+        }
+        .logout {
+            background: #be5545;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+        }
+        .logout:hover {
+            background: #a53f35;
+        }
+        .content {
+            flex: 1;
+            padding: 80px 40px 40px 80px;
+            transition: margin-left 0.7s;
+            margin-left: 30px;
+        }
+        .sidebar.expanded ~ .content {
+            margin-left: 210px;
+        }
+
+        .nav-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+        .search-container {
+            display: flex;
+            align-items: center;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 5px;
+            transition: all 0.3s ease-in-out;
+            width: 50%;
+        }
+        .search-bar {
+            flex: 1;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 20px;
+            font-size: 16px;
+            background: transparent;
+            outline: none;
+            transition: all 0.3s ease-in-out;
+        }
+        .search-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            font-size: 18px;
+            color: #888;
+            transition: all 0.3s ease-in-out;
+        }
+        .search-container:focus-within {
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+            background-color: #f1f1f1;
+            transform: scale(1.05);
+        }
+        .search-container:focus-within .search-btn {
+            color: #000;
+            transform: scale(1.1);
+        }
+        .search-dropdown {
+            position: absolute;
+            top: calc(100% + 5px);
+            width: 100%;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            list-style: none;
+            padding: 10px 0;
+            margin: 0;
+            display: none;
+            z-index: 1000;
+            overflow: hidden;
+        }
+        .search-dropdown li {
+            padding: 12px 15px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 14px;
+            color: #333;
+        }
+        .search-dropdown li:hover {
+            background: #f0f0f0;
+        }
+        .search-dropdown li:first-child {
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+        .search-dropdown li:last-child {
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+
+        </style>
+    </head>
+
+    <body>
+<!-- /* ------------------------------------------------------------------------------------------------------------- */ -->
+        <div class="navbar">
+            <div class="nav-left">
+                <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+                <div style="display: flex; flex-direction: column; align-items: left; gap: 5px;">
+                    <span style="font-size: 16px; color: rgb(241, 244, 252); "><b>BỆNH VIỆN ĐA KHOA KHA VẠN CÂN</b></span>
+                    <span style="font-size: 12px; color: rgb(213, 221, 241);"><b>HỆ THỐNG QUẢN LÝ DỮ LIỆU SỨC KHỎE NHÂN VIÊN</b></span>
+                </div>
+            </div>
+            <!-- <div class="nav-center">
+                <div class="search-container">
+                    <input type="text" class="search-bar" placeholder="Tìm kiếm dữ liệu" oninput="searchData(this.value)">
+                    <button class="search-btn" title="Search"><i class="fas fa-search search-icon"></i></button>
+                    <ul class="search-dropdown" id="searchResults"></ul>
+                </div>
+            </div> -->
+            <div class="nav-right">
+                <span class="date-display" id="dateDisplay"></span>
+                <button class="home-btn" type="button" title="Go to Home Page" onclick="goHome()"><i class="fas fa-home"></i></button>
+            </div>
+        </div>
+        <div class="sidebar" id="sidebar">
+            <ul>
+                <li onclick="window.location.href='add_new.html'">
+                    <i class="fas fa-plus"style="margin-left: 10px;"></i></i><span> Thêm dữ liệu mới</span>
+                </li>
+                <li onclick="window.location.href='edit.html'">
+                    <i class="fas fa-edit"style="margin-left: 10px;"></i></i><span> Sửa dữ liệu</span>
+                </li>
+                <li onclick="window.location.href='delete.html'">
+                    <i class="fas fa-trash"style="margin-left: 10px;"></i></i><span> Xóa dữ liệu</span>
+                </li>
+                <li onclick="window.location.href='add_limit.html'">
+                    <i class="fas fa-ruler-combined"style="margin-left: 10px;"></i></i><span> Sửa ngưỡng chuẩn</span>
+                </li>
+            </ul>
+            <div class="logout">
+                <i class="fas fa-sign-out-alt" style="margin-left: 10px;"></i><span> Đăng xuất</span>
+            </div>
+        </div>
+
+<!-- /* ------------------------------------------------------------------------------------------------------------- */ -->
+
+        <div class="edit-container">
+            <h4 class="title">Tìm kiếm thông tin nhân viên cần sửa</h4>
+            <div class="input-field">
+                <input type="text" id="searchInput" 
+                    oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 12);" 
+                    onblur="if (this.value.length === 12) { 
+                    }else{
+                        Swal.fire('Lỗi', 'Vui lòng kiểm tra lại định dạng số CCCD', 'error');
+                    }">
+                <label for="searchInput">Nhập CCCD cần tìm</label>
+            </div>
+            <div class="row" style="display: flex; justify-content: space-between; gap: 15px; margin-top: 30px;">
+                <button class="btn orange waves-effect waves-light" style="flex: 1;" onclick="fetchEditData()"><b>Tìm thông tin</b></button>
+            </div>
+
+            <h4 class="title">Chỉnh sửa thông tin</h4>
+            <!-- Thông tin cá nhân cơ bản -->
+            <div class="row">
+                <div class="input-field col s4">
+                    <input type="text" id="name" oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ỹ\s]/g, '')">
+                    <label for="name">Họ và tên</label> 
+                </div>
+                <div class="input-field col s4">
+                    <select id="position">
+                        <option value="" disabled selected>Chọn Khoa Phòng</option>
+                        <option value="Ban Giám đốc">Ban Giám đốc</option>
+                        <option value="Khoa Cấp cứu">Khoa Cấp cứu</option>
+                        <option value="Khoa Chẩn đoán hình ảnh">Khoa Chẩn đoán hình ảnh</option>
+                        <option value="Khoa Chấn thương chỉnh hình">Khoa Chấn thương chỉnh hình</option>
+                        <option value="Khoa Dinh dưỡng">Khoa Dinh dưỡng</option>
+                        <option value="Khoa Dược">Khoa Dược</option>
+                        <option value="Khoa Gây mê hồi sức">Khoa Gây mê hồi sức</option>
+                        <option value="Khoa Hồi sức tích cực và chống độc">Khoa Hồi sức tích cực và chống độc</option>
+                        <option value="Khoa Kiểm soát nhiễm khuẩn">Khoa Kiểm soát nhiễm khuẩn</option>
+                        <option value="Khoa Khám bệnh">Khoa Khám bệnh</option>
+                        <option value="Khoa Mắt">Khoa Mắt</option>
+                        <option value="Khoa Nội tiết">Khoa Nội tiết</option>
+                        <option value="Khoa Nội tiêu hóa">Khoa Nội tiêu hóa</option>
+                        <option value="Khoa Nội Tim Mạch">Khoa Nội Tim Mạch</option>
+                        <option value="Khoa Nội tổng hợp">Khoa Nội tổng hợp</option>
+                        <option value="Khoa Nội thần kinh">Khoa Nội thần kinh</option>
+                        <option value="Khoa Nội thận-Tiết niệu">Khoa Nội thận-Tiết niệu</option>
+                        <option value="Khoa Ngoại tiết niệu">Khoa Ngoại tiết niệu</option>
+                        <option value="Khoa Ngoại tổng hợp">Khoa Ngoại tổng hợp</option>
+                        <option value="Khoa Ngoại thần kinh">Khoa Ngoại thần kinh</option>
+                        <option value="Khoa Nhi">Khoa Nhi</option>
+                        <option value="Khoa Nhiễm">Khoa Nhiễm</option>
+                        <option value="Khoa Phục hồi chức năng">Khoa Phục hồi chức năng</option>
+                        <option value="Khoa Răng Hàm Mặt">Khoa Răng Hàm Mặt</option>
+                        <option value="Khoa Sản">Khoa Sản</option>
+                        <option value="Khoa Tai Mũi Họng">Khoa Tai Mũi Họng</option>
+                        <option value="Khoa Tim mạch can thiệp">Khoa Tim mạch can thiệp</option>
+                        <option value="Khoa Xét nghiệm">Khoa Xét nghiệm</option>
+                        <option value="Khoa Y học cổ truyền">Khoa Y học cổ truyền</option>
+                        <option value="Phòng Công nghệ thông tin">Phòng Công nghệ thông tin</option>
+                        <option value="Phòng Công tác xã hội">Phòng Công tác xã hội</option>
+                        <option value="Phòng Điều dưỡng">Phòng Điều dưỡng</option>
+                        <option value="Phòng Hành chính quản trị">Phòng Hành chính quản trị</option>
+                        <option value="Phòng Kế hoạch tổng hợp">Phòng Kế hoạch tổng hợp</option>
+                        <option value="Phòng Quản lý chất lượng">Phòng Quản lý chất lượng</option>
+                        <option value="Phòng Tài chính kế toán">Phòng Tài chính kế toán</option>
+                        <option value="Phòng Tổ chức cán bộ">Phòng Tổ chức cán bộ</option>
+                        <option value="Phòng Vật tư, trang thiết bị y tế">Phòng Vật tư, trang thiết bị y tế</option>
+                    </select>
+                    <label for="position">Khoa Phòng</label>
+                </div>
+                <div class="input-field col s4">
+                    <input type="text" id="jobtitle" oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ỹ\s]/g, '')">
+                    <label for="jobtitle">Chức danh nghề nghiệp</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="input-field col s4">
+                    <input type="number" id="age" oninput="this.value = this.value.slice(0, 4);" 
+                    onblur="if (this.value.length < 4 || (this.value.length === 4 && (this.value < 1900 || this.value > 2099))) { 
+                        Swal.fire('Lỗi', 'Năm sinh không hợp lệ. Vui lòng kiểm tra lại.', 'error'); 
+                    }">
+                    <label for="age">Năm sinh</label>
+                </div>
+                <div class="input-field col s4">
+                    <input type="number" id="phone" oninput="this.value = this.value.slice(0, 10);" 
+                    onblur="if (this.value.length < 10 || this.value.length > 11) {
+                        Swal.fire('Lỗi', 'Vui lòng kiểm tra lại số điện thoại', 'error');
+                    }">
+                    <label for="phone">Số điện thoại</label>
+                </div>
+                <div class="input-field col s4">
+                    <input type="number" id="CCCD" oninput="this.value = this.value.slice(0, 12);" 
+                    onblur="
+                    if (this.value.length === 12) {
+                        checkCCCDAvailableYet();
+                        if(CCCDisexsist) 
+                        {
+                            this.value = '0' + inputCCCDcurrent;
+                            M.updateTextFields();
+                        } else { }
+                    } else {
+                        Swal.fire('Lỗi', 'Vui lòng kiểm tra lại định dạng số CCCD', 'error');
+                        this.value = inputCCCDcurrent;
+                    }">
+                    <label for="CCCD">Số Căn Cước</label>
+                </div>
+            </div>
+            <!-- Chỉ số sức khỏe (Chiều cao) (Cân nặng) (BMI) -->
+            <div class="row">
+                <div class="input-field col s4 custom-height">
+                    <input type="text" id="height" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="flex-input">
+                    <label for="height">Chiều cao</label>
+                    <span class="unit-label">cm</span>
+                </div>
+                <style>
+                    .custom-height{
+                        display: flex; 
+                        align-items: center;
+                    }
+                </style>
+                <div class="input-field col s4 custom-wweight">
+                    <input type="text" id="weight" oninput="this.value = this.value.replace(/[^0-9]/g, ''); calculateBMI();">
+                    <label for="weight">Cân nặng</label>
+                    <span class="unit-label">kg</span>
+                </div>
+                <style>
+                    .custom-wweight{
+                        display: flex; 
+                        align-items: center;
+                    }
+                </style>
+                <div class="input-field col s4">
+                    <input type="text" id="bmi" readonly>
+                    <label for="bmi">BMI</label>
+                </div>
+            </div>
+            <!-- Chỉ số xét nghiệm (Huyết Áp) (Glucose) (Ure) (Creatinin) -->
+            <div class="row">
+                <div class="input-field col s3">
+                    <input type="number" id="systolic" oninput="this.value = this.value.slice(0, 3); updateBloodPressure();">
+                    <label for="systolic">Huyết áp Tâm thu</label>
+                </div>
+                <div class="input-field col s1">
+                    <span style="font-size: x-large; font-weight: bolder;">/</span>
+                </div>               
+                <div class="input-field col s3">
+                    <input type="number" id="diastolic" oninput="this.value = this.value.slice(0, 3); updateBloodPressure();">
+                    <label for="diastolic">Huyết áp Tâm trương</label>
+                </div>
+                <div class="input-field col s5" style="display: flex; align-items: center;">
+                    <input type="text" id="bloodpressure" readonly style="flex: 1;">
+                    <label for="bloodpressure">Huyết áp (Tâm thu / Tâm trương)</label>
+                    <span style="margin-left: 8px;">mmHg</span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="input-field col s4 align-center">
+                    <input type="text" id="whitebloodcell" 
+                        oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" 
+                        onblur="
+                            if (this.value.includes('.')) {
+                                this.value = this.value.replace('.', ',');
+                            } else if (this.value && !this.value.includes(',')) { 
+                                this.value += ',0'; 
+                            } else if (this.value.endsWith(',')) { 
+                                this.value += '0'; 
+                            }">
+                    <label for="whitebloodcell">Bạch Cầu</label>
+                </div>
+                <div class="input-field col s4 align-center">
+                    <input type="text" id="redbloodcell" 
+                            oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" 
+                            onblur="
+                            if (this.value.includes('.')) {
+                                this.value = this.value.replace('.', ',');
+                            } else if (this.value && !this.value.includes(',')) { 
+                                this.value += ',0'; 
+                            } else if (this.value.endsWith(',')) { 
+                                this.value += '0'; 
+                            }">
+                    <label for="redbloodcell">Hồng Cầu</label>
+                </div>
+                <div class="input-field col s4 align-center">
+                    <input type="number" id="platelet" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                    <label for="platelet">Tiểu Cầu</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="input-field col s4 align-center">
+                    <input type="text" id="Glucose" 
+                        oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" 
+                        onblur="
+                            if (this.value.includes('.')) {
+                                this.value = this.value.replace('.', ',');
+                            } else if (this.value && !this.value.includes(',')) { 
+                                this.value += ',0'; 
+                            } else if (this.value.endsWith(',')) { 
+                                this.value += '0'; 
+                            }">
+                    <label for="Glucose">Glucose</label>
+                </div>
+                <div class="input-field col s4 align-center">
+                    <input type="text" id="Ure" 
+                        oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" 
+                        onblur="
+                            if (this.value.includes('.')) {
+                                this.value = this.value.replace('.', ',');
+                            } else if (this.value && !this.value.includes(',')) { 
+                                this.value += ',0'; 
+                            } else if (this.value.endsWith(',')) { 
+                                this.value += '0'; 
+                            }">
+                    <label for="Ure">Ure</label>
+                </div>
+                <div class="input-field col s4 align-center">
+                    <input type="text" id="Creatinin" 
+                        oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" 
+                        onblur="
+                            if (this.value.includes('.')) {
+                                this.value = this.value.replace('.', ',');
+                            } else if (this.value && !this.value.includes(',')) { 
+                                this.value += ',0'; 
+                            } else if (this.value.endsWith(',')) { 
+                                this.value += '0'; 
+                            }">
+                    <label for="Creatinin">Creatinin</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="input-field col s6 align-center">
+                    <input type="text" id="SGOT" 
+                        oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" 
+                        onblur="
+                            if (this.value.includes('.')) {
+                                this.value = this.value.replace('.', ',');
+                            } else if (this.value && !this.value.includes(',')) { 
+                                this.value += ',0'; 
+                            } else if (this.value.endsWith(',')) { 
+                                this.value += '0'; 
+                            }">
+                    <label for="SGOT">SGOT (AST)</label>
+                </div>
+                <div class="input-field col s6 align-center">
+                    <input type="text" id="SGPT" 
+                        oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" 
+                        onblur="
+                            if (this.value.includes('.')) {
+                                this.value = this.value.replace('.', ',');
+                            } else if (this.value && !this.value.includes(',')) { 
+                                this.value += ',0'; 
+                            } else if (this.value.endsWith(',')) { 
+                                this.value += '0'; 
+                            }">
+                    <label for="SGPT">SGPT (ALT)</label>
+                </div>
+            </div>
+            <div class="row" style="display: flex; justify-content: space-between; gap: 15px; margin-top: 30px;">
+                <button class="btn green waves-effect waves-light" style="flex: 1;" onclick="updateData()"><b>Cập nhật</b></button>
+            </div>
+    
+        </div>
+
+    <script>
+        const scriptURL = "https://script.google.com/macros/s/AKfycbz_eGXI1hGmeHjtElHxPXzciawj1a9DQkWNL3spjJXr5EDbmTRMm8TQvpnyk2-59vFn/exec";
+        const scriptURL_nguong = "https://script.google.com/macros/s/AKfycbxIR-l6b23tkC3iYOd-36WBhJTx8qb7vpPkD__csaFi35POgGMCh0x8NzrniVf2KXcJ_w/exec";
+
+// Hàm tính năng chính
+
+        // Biến global để lưu dữ liệu ID
+        let globalID = ""; 
+
+        // Biến toàn cục để theo dõi trạng thái của CCCD
+        let CCCDisexsist = false; 
+
+        // Biến để lưu giá trị CCCD hiện tại
+        let inputCCCDcurrent = ""; 
+
+        // Biến để lưu giá trị CCCD mới
+        let inputCCCDnew = ""; 
+
+        // Khai báo các biến để lưu giá trị 
+        //      Min                          Max                         Đánh giá
+        let bmimin = "";            let bmimax = "";            let danhgia_bmi = "";
+        let bloodpressuremin = "";  let bloodpressuremax = "";  let danhgia_bloodpressure = "";
+        let whitebloodcellmin = ""; let whitebloodcellmax = ""; let danhgia_whitebloodcell = "";
+        let redbloodcellmin = "";   let redbloodcellmax = "";   let danhgia_redbloodcell = "";
+        let plateletmin = "";       let plateletmax = "";       let danhgia_platelet = "";
+        let Glucosemin = "";        let Glucosemax = "";        let danhgia_Glucose = "";
+        let Uremin = "";            let Uremax = "";            let danhgia_Ure = "";
+        let Creatininmin = "";      let Creatininmax = "";      let danhgia_Creatinin = "";
+        let SGOTmin = "";           let SGOTmax = "";           let danhgia_SGOT = "";
+        let SGPTmin = "";           let SGPTmax = "";           let danhgia_SGPT = "";
+
+        function getAllCCCDToArray() {
+
+            showLoading(); // Hiện spinner và chữ "Đang load dữ liệu"
+
+            let url = `${scriptURL}?action=checkcheckcccdavailable`;
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    window.dataArray = data; // Lưu dữ liệu vào biến toàn cục
+                    console.log("---------------------------------------------");
+                    console.log("Dữ liệu từ Google Sheets:", data);
+                    hideLoading(); // Ẩn spinner và chữ "Đang load dữ liệu"
+                })
+                .catch(error => {
+                    console.error("Lỗi:", error);
+                    Swal.fire("Lỗi", "Không thể tải dữ liệu CCCD hiện có. CCCD có thể trùng", "error");
+                    hideLoading(); // Ẩn spinner và chữ "Đang load dữ liệu"
+                });
+        }
+
+        // Gọi hàm để lấy dữ liệu từ Google Sheets khi trang được tải
+        getAllCCCDToArray();
+        getGiaTriNguong(); 
+        
+        function fetchEditData() {
+            // document.body.classList.add("loading"); // Khóa thao tác
+            showLoading(); // Hiện spinner và chữ "Đang load dữ liệu"
+            let query = document.getElementById("searchInput").value.trim().replace(/^0+/, '');
+            if (!query) {
+                clearInputs(["name", "jobtitle", "age", "phone", "CCCD", "height", "weight", "bmi",
+                        "bloodpressure", "whitebloodcell", "redbloodcell", "platelet",
+                        "Glucose", "Ure", "Creatinin", "SGOT", "SGPT", "systolic", "diastolic"]);
+                        
+                const positionSelect = document.getElementById("position");
+                positionSelect.value = ""; // Reset select input for position to default
+                const defaultOption = positionSelect.querySelector('option[disabled][selected]');
+                if (defaultOption) {
+                    defaultOption.selected = true; // Ensure the default option is selected
+                }
+                M.FormSelect.init(positionSelect); // Reinitialize Materialize select UI for the position element
+
+                M.updateTextFields(); // Cập nhật giao diện Materialize
+                Swal.fire("Lỗi", "Vui lòng nhập CCCD để tìm kiếm.", "error");
+                hideLoading(); // Ẩn spinner và chữ "Đang load dữ liệu"
+                return;
+            }
+            let url = `${scriptURL}?action=searchuser&query=${encodeURIComponent(query)}`;
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (data.length === 0) {
+                    Swal.fire("Thông báo", "Không tìm thấy dữ liệu.", "info");
+                    // clearInputs(["searchInput"]);
+                    clearInputs(["searchInput", "name", "jobtitle", "age", "phone", "CCCD", "height", "weight", "bmi",
+                            "bloodpressure", "whitebloodcell", "redbloodcell", "platelet",
+                            "Glucose", "Ure", "Creatinin", "SGOT", "SGPT", "systolic", "diastolic"]);
+
+                    const positionSelect = document.getElementById("position");
+                    positionSelect.value = ""; // Reset select input for position to default
+                    const defaultOption = positionSelect.querySelector('option[disabled][selected]');
+                    if (defaultOption) {
+                        defaultOption.selected = true; // Ensure the default option is selected
+                    }
+                    M.FormSelect.init(positionSelect); // Reinitialize Materialize select UI for the position element
+
+                    M.updateTextFields(); // Cập nhật giao diện Materialize
+                    hideLoading(); // Ẩn spinner và chữ "Đang load dữ liệu"
+                    return;
+                }
+                
+                let userData = data[0];
+                // document.getElementById("ID").value = userData[0];
+                globalID = userData[0]; // Lưu ID vào biến globalID
+                document.getElementById("name").value = userData[1];
+
+                const positionSelect = document.getElementById("position");
+                const positionValue = userData[2];
+                const options = Array.from(positionSelect.options);
+                const matchingOption = options.find(option => option.value === positionValue);
+                if (matchingOption) {
+                    positionSelect.value = positionValue;
+                    M.FormSelect.init(positionSelect); // Cập nhật giao diện Materialize
+                }
+
+                document.getElementById("jobtitle").value = userData[3]
+                document.getElementById("age").value = userData[4];
+                document.getElementById("phone").value = "0" + userData[5];
+                document.getElementById("CCCD").value = "0" + userData[6];
+                document.getElementById("height").value = userData[7];
+                document.getElementById("weight").value = userData[8];
+                document.getElementById("bmi").value = userData[9].toString().replace('.', ',');
+
+                document.getElementById("bloodpressure").value = userData[10];
+                const bloodPressure = userData[10].split('/');
+                document.getElementById("systolic").value = bloodPressure[0].trim();
+                document.getElementById("diastolic").value = bloodPressure[1].trim();
+
+                document.getElementById("whitebloodcell").value = userData[11].toString().replace('.', ',');
+                document.getElementById("redbloodcell").value = userData[12].toString().replace('.', ',');
+                document.getElementById("platelet").value = userData[13];
+                document.getElementById("Glucose").value = userData[14].toString().replace('.', ',');
+                document.getElementById("Ure").value = userData[15].toString().replace('.', ',');
+                document.getElementById("Creatinin").value = userData[16].toString().replace('.', ',');
+                document.getElementById("SGOT").value = userData[17].toString().replace('.', ',');
+                document.getElementById("SGPT").value = userData[18].toString().replace('.', ',');
+
+                inputCCCDcurrent = document.getElementById("searchInput").value.trim().replace(/^0+/, '');
+                console.log("Input CCCD current:", inputCCCDcurrent);
+                clearInputs(["searchInput"]);
+                M.updateTextFields(); // Cập nhật giao diện Materialize
+                hideLoading(); // Ẩn spinner và chữ "Đang load dữ liệu"
+            })
+            .catch(error => {
+                console.error("Lỗi:", error);
+                Swal.fire("Lỗi", "Đã xảy ra lỗi khi tìm kiếm.", "error");
+                hideLoading(); // Ẩn spinner và chữ "Đang load dữ liệu"
+            });
+        }
+
+        function updateBloodPressure() {
+            const systolic = document.getElementById("systolic").value;
+            const diastolic = document.getElementById("diastolic").value;
+            const bloodpressure = systolic && diastolic ? `${systolic}/${diastolic}` : "";
+            document.getElementById("bloodpressure").value = bloodpressure;
+            M.updateTextFields();
+        }
+        
+        function updateData() {
+
+            let editID = globalID; // Sử dụng biến globalID đã lưu ID
+            console.log("---------------------------------------------");
+            console.log("Current globalID:", globalID);
+
+            const fields = [
+                "name", "position", "jobtitle", "age", "phone", "CCCD", "height", "weight", "bmi", 
+                "bloodpressure", "whitebloodcell", "redbloodcell", "platelet", 
+                "Glucose", "Ure", "Creatinin", "SGOT", "SGPT"
+            ];
+            const [
+                name, position, jobtitle, age, phone, CCCD, height, weight, bmi, 
+                bloodpressure, whitebloodcell, redbloodcell, platelet, 
+                Glucose, Ure, Creatinin, SGOT, SGPT
+            ] = fields.map(id => document.getElementById(id).value.trim());
+            
+            if (!name.trim() || !position.trim()  || !jobtitle.trim() || !age.trim() || !phone.trim() || !CCCD.trim() || !height.trim() || !weight.trim() 
+                    || !bmi.trim() || !weight.trim() || !bmi.trim()|| !bloodpressure.trim() || !whitebloodcell.trim()|| !redbloodcell.trim()
+                    || !platelet.trim() || !Glucose.trim() || !Ure.trim() || !Creatinin.trim() || !SGOT.trim() || !SGPT.trim()) {
+                    Swal.fire("Lỗi", "Vui lòng nhập đầy đủ thông tin.", "error");
+                    return;
+            }
+
+            const logFields = [
+                { label: "BMI", value: bmi },
+                { label: "Blood Pressure", value: bloodpressure },
+                { label: "White Blood Cell", value: whitebloodcell },
+                { label: "Red Blood Cell", value: redbloodcell },
+                { label: "Platelet", value: platelet },
+                { label: "Glucose", value: Glucose },
+                { label: "Ure", value: Ure },
+                { label: "Creatinin", value: Creatinin },
+                { label: "SGOT", value: SGOT },
+                { label: "SGPT", value: SGPT }
+            ];
+
+            logFields.forEach(field => console.log(`${field.label}:`, field.value));
+
+            danhgia_bmi            = (parseFloat(bmi.replace(',', '.')) < parseFloat(bmimin.replace(',', '.'))) ? "Low" :
+                                        (parseFloat(bmi.replace(',', '.')) > parseFloat(bmimax.replace(',', '.'))) ? "High" : "BT";
+
+            danhgia_whitebloodcell = (parseFloat(whitebloodcell.replace(',', '.')) < parseFloat(whitebloodcellmin.replace(',', '.'))) ? "Low" :
+                                        (parseFloat(whitebloodcell.replace(',', '.')) > parseFloat(whitebloodcellmax.replace(',', '.'))) ? "High" : "BT";
+
+            danhgia_redbloodcell   = (parseFloat(redbloodcell.replace(',', '.')) < parseFloat(redbloodcellmin.replace(',', '.'))) ? "Low" :
+                                        (parseFloat(redbloodcell.replace(',', '.')) > parseFloat(redbloodcellmax.replace(',', '.'))) ? "High" : "BT";
+
+            danhgia_platelet       = (parseFloat(platelet) < parseFloat(plateletmin)) ? "Low" :
+                                        (parseFloat(platelet) > parseFloat(plateletmax)) ? "High" : "BT";
+
+            danhgia_Glucose        = (parseFloat(Glucose.replace(',', '.')) < parseFloat(Glucosemin.replace(',', '.'))) ? "Low" :
+                                        (parseFloat(Glucose.replace(',', '.')) > parseFloat(Glucosemax.replace(',', '.'))) ? "High" : "BT";
+
+            danhgia_Ure            = (parseFloat(Ure.replace(',', '.')) < parseFloat(Uremin.replace(',', '.'))) ? "Low" :
+                                        (parseFloat(Ure.replace(',', '.')) > parseFloat(Uremax.replace(',', '.'))) ? "High" : "BT";
+
+            danhgia_Creatinin      = (parseFloat(Creatinin.replace(',', '.')) < parseFloat(Creatininmin.replace(',', '.'))) ? "Low" :
+                                        (parseFloat(Creatinin.replace(',', '.')) > parseFloat(Creatininmax.replace(',', '.'))) ? "High" : "BT";
+
+            danhgia_SGOT           = (parseFloat(SGOT.replace(',', '.')) < parseFloat(SGOTmin.replace(',', '.'))) ? "Low" :
+                                        (parseFloat(SGOT.replace(',', '.')) > parseFloat(SGOTmax.replace(',', '.'))) ? "High" : "BT";
+
+            danhgia_SGPT           = (parseFloat(SGPT.replace(',', '.')) < parseFloat(SGPTmin.replace(',', '.'))) ? "Low" :
+                                        (parseFloat(SGPT.replace(',', '.')) > parseFloat(SGPTmax.replace(',', '.'))) ? "High" : "BT";
+
+            // Đánh giá huyết áp
+            const [systolic, diastolic] = bloodpressure.replace(',', '.').split('/').map(parseFloat);
+            const [systolicMin, diastolicMin] = bloodpressuremin.replace(',', '.').split('/').map(parseFloat);
+            const [systolicMax, diastolicMax] = bloodpressuremax.replace(',', '.').split('/').map(parseFloat);
+
+            if (systolic < systolicMin || diastolic < diastolicMin) {
+                danhgia_bloodpressure = "Low".toString();
+            } else if (systolic > systolicMax || diastolic > diastolicMax) {
+                danhgia_bloodpressure = "High".toString();
+            } else if ((systolic > systolicMax && diastolic < diastolicMin) || (systolic < systolicMin && diastolic > diastolicMax)) {
+                danhgia_bloodpressure = "Inconsistent".toString();
+            } else {
+                danhgia_bloodpressure = "BT".toString();
+            }
+            
+            let url = `${scriptURL}?action=updateuser` +
+                    `&id=${encodeURIComponent(editID)}` +
+                    `&name=${encodeURIComponent(name)}` +
+                    `&position=${encodeURIComponent(position)}` +
+                    `&jobtitle=${encodeURIComponent(jobtitle)}` +
+                    `&age=${encodeURIComponent(age)}` +
+                    `&phone=${encodeURIComponent(phone)}` +
+                    `&CCCD=${encodeURIComponent(CCCD)}` +
+                    `&height=${encodeURIComponent(height)}` +
+                    `&weight=${encodeURIComponent(weight)}` +
+                    `&bmi=${encodeURIComponent(bmi)}` +
+                    `&bloodpressure=${encodeURIComponent(bloodpressure)}` +
+                    `&whitebloodcell=${encodeURIComponent(whitebloodcell)}` +
+                    `&redbloodcell=${encodeURIComponent(redbloodcell)}` +
+                    `&platelet=${encodeURIComponent(platelet)}` +
+                    `&Glucose=${encodeURIComponent(Glucose)}` +
+                    `&Ure=${encodeURIComponent(Ure)}` +
+                    `&Creatinin=${encodeURIComponent(Creatinin)}` +
+                    `&SGOT=${encodeURIComponent(SGOT)}` +
+                    `&SGPT=${encodeURIComponent(SGPT)}` +
+                    `&danhgia_bmi=${encodeURIComponent(danhgia_bmi)}` +
+                    `&danhgia_bloodpressure=${encodeURIComponent(danhgia_bloodpressure)}` +
+                    `&danhgia_whitebloodcell=${encodeURIComponent(danhgia_whitebloodcell)}` +
+                    `&danhgia_redbloodcell=${encodeURIComponent(danhgia_redbloodcell)}` +
+                    `&danhgia_platelet=${encodeURIComponent(danhgia_platelet)}` +
+                    `&danhgia_Glucose=${encodeURIComponent(danhgia_Glucose)}` +
+                    `&danhgia_Ure=${encodeURIComponent(danhgia_Ure)}` +
+                    `&danhgia_Creatinin=${encodeURIComponent(danhgia_Creatinin)}` +
+                    `&danhgia_SGOT=${encodeURIComponent(danhgia_SGOT)}` +
+                    `&danhgia_SGPT=${encodeURIComponent(danhgia_SGPT)}`;
+                    
+            fetch(url)
+                .then(response => response.text())
+                .then(data => {
+                    Swal.fire("Thành công", data, "success");
+                    clearInputs(["name", "jobtitle", "age", "phone", "CCCD", "height", "weight", "bmi",
+                        "bloodpressure", "whitebloodcell", "redbloodcell", "platelet",
+                        "Glucose", "Ure", "Creatinin", "SGOT", "SGPT", "systolic", "diastolic"]);
+
+                    const positionSelect = document.getElementById("position");
+                    positionSelect.value = ""; // Reset select input for position to default
+                    const defaultOption = positionSelect.querySelector('option[disabled][selected]');
+                    if (defaultOption) {
+                        defaultOption.selected = true; // Ensure the default option is selected
+                    }
+                    M.FormSelect.init(positionSelect); // Reinitialize Materialize select UI for the position element
+                    
+                    console.log("---------------------------------------------");
+                    console.log("Evaluations:");
+                    console.log("danhgia_bmi:", danhgia_bmi);
+                    console.log("danhgia_bloodpressure:", danhgia_bloodpressure);
+                    console.log("danhgia_whitebloodcell:", danhgia_whitebloodcell);
+                    console.log("danhgia_redbloodcell:", danhgia_redbloodcell);
+                    console.log("danhgia_platelet:", danhgia_platelet);
+                    console.log("danhgia_Glucose:", danhgia_Glucose);
+                    console.log("danhgia_Ure:", danhgia_Ure);
+                    console.log("danhgia_Creatinin:", danhgia_Creatinin);
+                    console.log("danhgia_SGOT:", danhgia_SGOT);
+                    console.log("danhgia_SGPT:", danhgia_SGPT);
+
+                    M.updateTextFields(); // Cập nhật giao diện Materialize
+                })
+                .catch(error => console.error("Lỗi:", error));
+
+                globalID = ""; // Biến global để lưu dữ liệu ID
+                console.log("Current globalID_after:", globalID);
+            }
+
+// Hàm support giao diện
+
+        // Hàm để thêm spinner và chữ "Đang load dữ liệu" vào trang
+        function showLoading() {
+            // Tạo phần tử spinner
+            const spinner = document.createElement("div");
+            spinner.id = "loadingSpinner";
+            spinner.classList.add("loading-spinner");
+            
+            // Tạo phần tử chữ "Đang load dữ liệu"
+            const loadingText = document.createElement("div");
+            loadingText.id = "loadingText";
+            loadingText.classList.add("loading-text");
+            loadingText.textContent = "Đang load dữ liệu...";
+
+            // Thêm phần tử spinner và chữ vào body
+            document.body.appendChild(spinner);
+            document.body.appendChild(loadingText);
+            
+            // Thêm lớp loading vào body để khóa các thao tác
+            document.body.classList.add("loading");
+        }
+
+        // Hàm để xóa spinner và chữ "Đang load dữ liệu"
+        function hideLoading() {
+            // Xóa phần tử spinner và chữ "Đang load dữ liệu" khỏi DOM
+            const spinner = document.getElementById("loadingSpinner");
+            const loadingText = document.getElementById("loadingText");
+
+            if (spinner) {
+                spinner.remove();
+            }
+            if (loadingText) {
+                loadingText.remove();
+            }
+            
+            // Xóa lớp loading khỏi body để cho phép thao tác
+            document.body.classList.remove("loading");
+        }
+
+// Hàm support tính năng
+
+        function clearInputs(inputs) {
+            inputs.forEach(id => document.getElementById(id).value = "");
+        }
+
+        function calculateBMI() {
+            const height = parseFloat(document.getElementById("height").value) / 100; // Convert cm to meters
+            const weight = parseFloat(document.getElementById("weight").value);
+            if (height > 0 && weight > 0) {
+                const bmi = (weight / (height * height)).toFixed(2).replace('.', ',');
+                document.getElementById("bmi").value = bmi;
+            } else {
+                document.getElementById("bmi").value = "";
+            }
+        }
+        document.getElementById("height").addEventListener("input", calculateBMI);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var elems = document.querySelectorAll('select');
+            M.FormSelect.init(elems);
+        });
+
+        function checkCCCDAvailableYet() {
+            
+            inputCCCDnew = document.getElementById("CCCD").value.trim().replace(/^0+/, '');
+            console.log("Input CCCD new:", inputCCCDnew);
+
+            if (!window.dataArray || window.dataArray.length === 0) {
+                Swal.fire("Lỗi", "Dữ liệu chưa được tải, vui lòng thử lại.", "error");
+                return;
+            }
+
+            // Chuyển tất cả dữ liệu trong Google Sheets thành chuỗi để so sánh chính xác
+            let normalizedData = window.dataArray.map(item => item.toString().trim());
+
+            if (inputCCCDcurrent === inputCCCDnew) {}
+            else
+            {
+                if (normalizedData.includes(inputCCCDnew)) {
+                    CCCDisexsist = true;
+                    Swal.fire("Thông báo", "Số CCCD này đã có trên hệ thống", "error");
+                } else {
+                    CCCDisexsist = false;
+                    // Swal.fire("Thông báo", "Giá trị này chưa có trong Google Sheets.", "info");
+                }
+            }
+        }
+
+        function getGiaTriNguong() {
+        let url_nguong = `${scriptURL_nguong}?action=fetchdata`;
+            fetch(url_nguong)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length === 0) {
+                        Swal.fire("Thông báo", "Không tìm thấy dữ liệu.", "info");
+                        M.updateTextFields();
+                        return;
+                    }
+
+                    let userData = data[0];
+                    bmimin = userData[0].toString().replace('.', ',');
+                    bmimax = userData[1].toString().replace('.', ',');
+                    bloodpressuremin = userData[2];
+                    bloodpressuremax = userData[3];
+                    whitebloodcellmin = userData[4].toString().replace('.', ',');
+                    whitebloodcellmax = userData[5].toString().replace('.', ',');
+                    redbloodcellmin = userData[6].toString().replace('.', ',');
+                    redbloodcellmax = userData[7].toString().replace('.', ',');
+                    plateletmin = userData[8];
+                    plateletmax = userData[9];
+                    Glucosemin = userData[10].toString().replace('.', ',');
+                    Glucosemax = userData[11].toString().replace('.', ',');
+                    Uremin = userData[12].toString().replace('.', ',');
+                    Uremax = userData[13].toString().replace('.', ',');
+                    Creatininmin = userData[14].toString().replace('.', ',');
+                    Creatininmax = userData[15].toString().replace('.', ',');
+                    SGOTmin = userData[16].toString().replace('.', ',');
+                    SGOTmax = userData[17].toString().replace('.', ',');
+                    SGPTmin = userData[18].toString().replace('.', ',');
+                    SGPTmax = userData[19].toString().replace('.', ',');
+
+                    const logValues = {
+                        bmimin, bmimax, bloodpressuremin, bloodpressuremax,
+                        whitebloodcellmin, whitebloodcellmax, redbloodcellmin, redbloodcellmax,
+                        plateletmin, plateletmax, Glucosemin, Glucosemax,
+                        Uremin, Uremax, Creatininmin, Creatininmax,
+                        SGOTmin, SGOTmax, SGPTmin, SGPTmax
+                    };
+
+                    console.log("---------------------------------------------");
+                    console.log("Min/Max Values:");
+                    for (const [key, value] of Object.entries(logValues)) {
+                        const maxKey = key.endsWith("min") ? key.replace("min", "max") : null;
+                        if (maxKey && logValues[maxKey]) {
+                            console.log(`${key}: ${value}, ${maxKey}: ${logValues[maxKey]}`);
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error("Lỗi:", error);
+                    Swal.fire("Lỗi", "Đã xảy ra lỗi khi đánh giá sức khỏe.", "error");
+                });
+        }
+
+// Các hàm giao diện Home
+
+function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('expanded');
+        }
+        
+        function goHome() {
+            window.location.href = 'home.html';
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelector(".logout").addEventListener("click", function() {
+                Swal.fire({
+                    title: "Bạn có chắc muốn đăng xuất?",
+                    text: "Bạn sẽ được chuyển đến trang đăng nhập.",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: '<span style="display: inline-block; width: 100px;">Đăng xuất</span>',
+                    cancelButtonText: '<span style="display: inline-block; width: 100px;">Hủy</span>'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: "Đăng xuất thành công",
+                            text: "Bạn sẽ được chuyển hướng",
+                            icon: "success",
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            localStorage.removeItem('username');
+                            localStorage.removeItem('rememberMe');
+                            sessionStorage.clear();
+                            window.location.assign('index.html');
+                        });
+                    }
+                });
+            });
+        });
+        
+        function updateDate() {
+            const dateElement = document.getElementById('dateDisplay');
+            const now = new Date();
+            const formattedDate = now.getDate().toString().padStart(2, '0') + '/' +
+                                  (now.getMonth() + 1).toString().padStart(2, '0') + '/' +
+                                  now.getFullYear();
+            dateElement.textContent = formattedDate;
+        }
+
+        updateDate();
+
+    </script>
+</body>
+</html>
