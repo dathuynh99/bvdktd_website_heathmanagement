@@ -309,10 +309,10 @@
                                     // tdValue.style.color = "red";
                                     // tdValue.style.fontWeight = "bold";
                                     tdValue.classList.add("chisocao-highlight");
-                                    addRow("⚠️ Bạn thừa cân", "Hãy tập thể dục đều đặn và ăn uống lành mạnh.", "#e65100");
+                                    addRow("⚠️ Bạn bị thừa cân", "Hãy tập thể dục đều đặn và ăn uống lành mạnh.", "#e65100");
                                 } else if (nhanxet_bmi === "Thiếu cân") {
                                     tdValue.classList.add("chisothap-highlight");
-                                    addRow("🍽️ Bạn thiếu cân", "Nên bổ sung dinh dưỡng đầy đủ.", "#0277bd");;
+                                    addRow("🍽️ Bạn bị thiếu cân", "Nên bổ sung dinh dưỡng đầy đủ.", "#0277bd");;
                                 } else if (nhanxet_bmi === "BT") { } 
                             } else if(i === 10) {
                                 tdValue.textContent = rowData[i] || "Không có dữ liệu";
@@ -323,34 +323,34 @@
                                     tdValue.classList.add("chisothap-highlight");
                                     addRow("🩸 Huyết áp thấp", "Nên ăn đủ, uống nước và không nên đứng dậy quá nhanh.", "#0d47a1");
                                 } else if (nhanxet_huyetap === "Không nhất quán") {
-                                    addRow("⚖️ Huyết áp không nhất quán", "Chỉ số tâm thu và tâm trương lệch nhau. Nên theo dõi thêm hoặc đo lại.", "#f57c00");
+                                    addRow("⚖️ Huyết áp không nhất quán", "Chỉ số tâm thu và tâm trương lệch nhau. Nên theo dõi thường xuyên hơn.", "#f57c00");
                                 } else if (nhanxet_huyetap === "BT") { } 
                             } else if (i === 11) {
                                 tdValue.textContent = rowData[i] || "Không có dữ liệu";
                                 if (nhanxet_bachcau === "Bạch cầu cao") {
                                     tdValue.classList.add("chisocao-highlight");
-                                    addRow("🧪 Bạch cầu cao", "Có thể là dấu hiệu viêm hoặc nhiễm trùng. Nên khám thêm để tìm nguyên nhân.", "#e65100");
+                                    addRow("🧪 Bạch cầu cao", "Có thể là dấu hiệu viêm hoặc nhiễm trùng. Nên khám chuyên sâu thêm để tìm nguyên nhân.", "#e65100");
                                 } else if (nhanxet_bachcau === "Bạch cầu thấp") {
                                     tdValue.classList.add("chisothap-highlight");
-                                    addRow("🧪 Bạch cầu thấp", "Có thể do suy giảm miễn dịch hoặc thiếu máu. Nên xét nghiệm lại và theo dõi bác sĩ.", "#0277bd");
+                                    addRow("🧪 Bạch cầu thấp", "Có thể do suy giảm miễn dịch hoặc thiếu máu. Nên khám chuyên sâu thêm để tìm nguyên nhân.", "#0277bd");
                                 } else if (nhanxet_bachcau === "BT") { } 
                             } else if (i === 12) {
                                 tdValue.textContent = rowData[i] || "Không có dữ liệu";
                                 if (nhanxet_hongcau === "Hồng cầu cao") {
                                     tdValue.classList.add("chisocao-highlight");
-                                    addRow("🩸 Hồng cầu cao", "Có thể liên quan đến bệnh lý về phổi hoặc tim. Nên kiểm tra chuyên sâu.", "#e65100");
+                                    addRow("🩸 Hồng cầu cao", "Có thể liên quan đến bệnh lý về phổi hoặc tim. Nên kiểm tra chuyên sâu để tìm nguyên nhân.", "#e65100");
                                 } else if (nhanxet_hongcau === "Hồng cầu thấp") {
                                     tdValue.classList.add("chisothap-highlight");
-                                    addRow("🩸 Hồng cầu thấp", "Có thể là thiếu máu. Nên bổ sung sắt và khám bác sĩ.", "#0277bd");
+                                    addRow("🩸 Hồng cầu thấp", "Có thể là do thiếu máu. Nên bổ sung sắt và tham khảo ý kiến bác sĩ chuyên khoa.", "#0277bd");
                                 } else if (nhanxet_hongcau === "BT") { } 
                             } else if (i === 13) {
                                 tdValue.textContent = rowData[i] || "Không có dữ liệu";
                                 if (nhanxet_tieucau === "Tiểu cầu cao") {
                                     tdValue.classList.add("chisocao-highlight");
-                                    addRow("🧫 Tiểu cầu cao", "Có thể liên quan đến viêm, nhiễm trùng hoặc bệnh máu. Cần kiểm tra kỹ.", "#e65100");
+                                    addRow("🧫 Tiểu cầu cao", "Có thể liên quan đến viêm, nhiễm trùng hoặc bệnh về máu. Cần kiểm tra kỹ.", "#e65100");
                                 } else if (nhanxet_tieucau === "Tiểu cầu thấp") {
                                     tdValue.classList.add("chisothap-highlight");
-                                    addRow("🧫 Tiểu cầu thấp", "Nguy cơ chảy máu cao. Cần theo dõi sát và điều trị nếu cần.", "#0277bd");
+                                    addRow("🧫 Tiểu cầu thấp", "Nguy cơ mất máu cao. Cần theo dõi sát và điều trị nếu cần.", "#0277bd");
                                 } else if (nhanxet_tieucau === "BT") { } 
                             } else if (i === 14) {
                                 tdValue.textContent = rowData[i] || "Không có dữ liệu";
@@ -377,7 +377,7 @@
                                     addRow("🩻 Creatinin cao", "Dấu hiệu chức năng thận suy giảm. Nên kiểm tra tổng quát sớm.", "#b71c1c");
                                 } else if (nhanxet_creatinin === "Creatinin thấp") {
                                     tdValue.classList.add("chisothap-highlight");
-                                    addRow("🩻 Creatinin thấp", "Thường do giảm khối lượng cơ hoặc dinh dưỡng kém.", "#0d47a1");
+                                    addRow("🩻 Creatinin thấp", "Thường do giảm khối lượng cơ hoặc dinh dưỡng kém. Chú ý theo dõi và tham khảo ý kiến bác sĩ.", "#0d47a1");
                                 } else if (nhanxet_creatinin === "BT") { } 
                             } else if (i === 17) {
                                 tdValue.textContent = rowData[i] || "Không có dữ liệu";
@@ -395,7 +395,7 @@
                                     addRow("🧬 SGPT cao", "Có thể là gan nhiễm mỡ, viêm gan hoặc tác động thuốc. Nên điều chỉnh chế độ ăn uống.", "#b71c1c");
                                 } else if (nhanxet_sgpt === "SGPT thấp") {
                                     tdValue.classList.add("chisothap-highlight");
-                                    addRow("🧬 SGPT thấp", "Không phổ biến, nhưng nên theo dõi nếu kết hợp với các chỉ số khác.", "#0277bd");
+                                    addRow("🧬 SGPT thấp", "Không phổ biến, nhưng nên theo dõi kết hợp với các chỉ số khác.", "#0277bd");
                                 } else if (nhanxet_sgpt === "BT") { }
                             } else { tdValue.textContent = rowData[i] || "Không có dữ liệu"; }
 
