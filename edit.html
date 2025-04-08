@@ -356,7 +356,7 @@
             <!-- Thông tin cá nhân cơ bản -->
             <div class="row">
                 <div class="input-field col s4">
-                    <input type="text" id="name" oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ỹ\s]/g, '')">
+                    <input type="text" id="name" oninput="this.value = this.value.normalize('NFC').replace(/[^a-zA-ZÀ-ỹ\s\u0300-\u036f]/g, '')">
                     <label for="name">Họ và tên</label> 
                 </div>
                 <div class="input-field col s4">
@@ -404,7 +404,7 @@
                     <label for="position">Khoa Phòng</label>
                 </div>
                 <div class="input-field col s4">
-                    <input type="text" id="jobtitle" oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ỹ\s]/g, '')">
+                    <input type="text" id="jobtitle" oninput="this.value = this.value.normalize('NFC').replace(/[^a-zA-ZÀ-ỹ\s\u0300-\u036f]/g, '')">
                     <label for="jobtitle">Chức danh nghề nghiệp</label>
                 </div>
             </div>
