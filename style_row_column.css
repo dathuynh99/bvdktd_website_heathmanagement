@@ -1,0 +1,16 @@
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+  
+  .col {
+    padding: 0 0.75rem;
+    box-sizing: border-box;
+  }
+  
+.s1 { width: 8.3333333333%; }
+.s3 { width: 25%; }
+.s4 { width: 33.3333333333%; }
+.s5 { width: 41.6666666667%; }
+.s6 { width: 50%; }

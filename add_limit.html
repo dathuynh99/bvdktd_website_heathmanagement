@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý dữ liệu ngưỡng (Chuyên Khoa)</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <!-- Thư viện Noti đẹp -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+    <!-- Thêm Mermaid.js để vẽ lưu đồ -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <!-- Load Google Charts -->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <script src="utils.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style_input_btn.css">
+
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            text-align: center;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        /* .addlimit-container {
+            max-width: 800px;
+            margin: 80px auto 0;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            transition: margin-left 0.7s;
+            margin-left: calc(50% - 400px);
+        }
+
+        .sidebar.expanded~.addlimit-container {
+            margin-left: calc(50% - 400px + 126.5px);
+        } */
+    </style>
+</head>
+
+<body>
+    <div class="navbar">
+        <div class="nav-left">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div style="display: flex; flex-direction: column; align-items: left; gap: 5px;">
+                <span style="font-size: 16px; color: rgb(241, 244, 252); "><b>BỆNH VIỆN ĐA KHOA KHA VẠN CÂN</b></span>
+                <span style="font-size: 12px; color: rgb(213, 221, 241);"><b>HỆ THỐNG QUẢN LÝ DỮ LIỆU SỨC KHỎE NHÂN
+                        VIÊN</b></span>
+            </div>
+        </div>
+        <div class="nav-center">
+            <div class="search-container">
+                <input type="text" class="search-bar" placeholder="Tìm kiếm dữ liệu"
+                    oninput="searchCCCDDataInSearchBar(this.value)">
+                <button class="search-btn" title="Search"><i class="fas fa-search"></i></button>
+                <ul class="search-dropdown" id="searchResults"></ul>
+            </div>
+        </div>
+        <div class="nav-right">
+            <span class="date-display" id="dateDisplay"></span>
+            <button class="home-btn" type="button" title="Go to Home Page" onclick="goHome()"><i
+                    class="fas fa-home"></i></button>
+        </div>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+        <ul class="sidebar-menu">
+            <!-- Nhân sự -->
+            <li class="menu-group">
+                <div class="menu-header" onclick="toggleSubMenu(this)">
+                    <div class="icon-wrapper">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <span> Nhân sự</span>
+                    <i class="fas fa-chevron-down arrow-icon"></i>
+                </div>
+                <ul class="submenu">
+                    <li onclick="window.location.href='add_new.html'">
+                        <i class="fas fa-plus" style="margin-left: 25px;"></i><span> Thêm dữ liệu mới</span>
+                    </li>
+                    <li onclick="window.location.href='edit.html'">
+                        <i class="fas fa-edit" style="margin-left: 25px;"></i><span> Sửa dữ liệu</span>
+                    </li>
+                    <li onclick="window.location.href='delete.html'">
+                        <i class="fas fa-trash" style="margin-left: 25px;"></i><span> Xóa dữ liệu</span>
+                    </li>
+                </ul>
+            </li>
+
+            <!-- Chuyên Khoa -->
+            <li class="menu-group">
+                <div class="menu-header" onclick="toggleSubMenu(this)">
+                    <div class="icon-wrapper">
+                        <i class="fas fa-stethoscope"></i>
+                    </div>
+                    <span> Chuyên Khoa</span>
+                    <i class="fas fa-chevron-down arrow-icon"></i>
+                </div>
+                <ul class="submenu">
+                    <li onclick="window.location.href='add_limit.html'">
+                        <i class="fas fa-ruler-combined" style="margin-left: 25px;"></i><span> Sửa ngưỡng chuẩn</span>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+
+        <div class="logout">
+            <div class="icon-wrapper">
+                <i class="fas fa-sign-out-alt"></i>
+            </div>
+            <span> Đăng xuất</span>
+        </div>
+    </div>
+
+    <!-- /* ------------------------------------------------------------------------------------------------------------- */ -->
+
+    <div class="content">
+        <!-- <h4 class="title">Chỉnh sửa ngưỡng chuẩn của chỉ số sức khỏe</h4> -->
+        <!-- Chỉ số (BMI) -->
+        <div class="row">
+            <div class="input-field col s6">
+                <input type="text" id="bmimin"
+                    oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" onblur="
+                                if (this.value.includes('.')) {
+                                    this.value = this.value.replace('.', ',');
+                                } else if (this.value && !this.value.includes(',')) { 
+                                    this.value += ',0'; 
+                                } else if (this.value.endsWith(',')) { 
+                                    this.value += '0'; 
+                                }">
+                <label for="bmimin"><b>BMI Min</b></label>
+            </div>
+            <div class="input-field col s6">
+                <input type="text" id="bmimax"
+                    oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" onblur="
+                                if (this.value.includes('.')) {
+                                    this.value = this.value.replace('.', ',');
+                                } else if (this.value && !this.value.includes(',')) { 
+                                    this.value += ',0'; 
+                                } else if (this.value.endsWith(',')) { 
+                                    this.value += '0'; 
+                                }
+                                const bmimin = parseFloat(document.getElementById('bmimin').value.replace(',', '.'));
+                                const bmimax = parseFloat(this.value.replace(',', '.'));
+                                if (bmimax <= bmimin) {
+                                    Swal.fire('Lỗi', 'Giá trị Max không được nhỏ hơn hoặc bằng giá trị min', 'error');
+                                    this.value = (bmimin + 1).toString().replace('.', ','); // Đặt giá trị mặc định là lớn hơn BMI Min
+                                }">
+                <label for="bmimax"><b>BMI Max</b></label>
+            </div>
+        </div>
+        <!-- Chỉ số xét nghiệm (Huyết Áp) -->
+        <div class="row">
+            <div class="input-field col s6 custom-bloodpressure">
+                <input type="text" id="bloodpressuremin"
+                    oninput="this.value = this.value.replace(/[^0-9/]/g, '').replace(/(\/.*\/)/g, '/');"
+                    pattern="^\d{1,3}\/\d{1,3}$">
+                <label for="bloodpressuremin"><b>Huyết áp Min</b></label>
+                <span class="unit-label">mmHg</span>
+            </div>
+            <div class="input-field col s6 custom-bloodpressure">
+                <input type="text" id="bloodpressuremax"
+                    oninput="this.value = this.value.replace(/[^0-9/]/g, '').replace(/(\/.*\/)/g, '/');"
+                    pattern="^\d{1,3}\/\d{1,3}$" onblur="
+                            const bpMin = document.getElementById('bloodpressuremin').value.split('/').map(Number);
+                            const bpMax = this.value.split('/').map(Number);
+                            if (bpMin.length === 2 && bpMax.length === 2) {
+                                if (bpMax[0] <= bpMin[0] || bpMax[1] <= bpMin[1]) {
+                                    Swal.fire('Lỗi', 'Giá trị Max không được nhỏ hơn hoặc bằng giá trị min', 'error');
+                                    this.value = `${bpMin[0] + 1}/${bpMin[1] + 1}`; // Đặt giá trị mặc định lớn hơn Huyết áp Min
+                                }
+                            }">
+                <label for="bloodpressuremax"><b>Huyết áp Max</b></label>
+                <span class="unit-label">mmHg</span>
+            </div>
+        </div>
+        <style>
+            .custom-bloodpressure {
+                display: flex;
+                align-items: center;
+            }
+        </style>
+        <!-- Chỉ số xét nghiệm (Bạch Cầu) -->
+        <div class="row">
+            <div class="input-field col s6 align-center">
+                <input type="text" id="whitebloodcellmin"
+                    oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" onblur="
+                            if (this.value.includes('.')) {
+                                this.value = this.value.replace('.', ',');
+                            } else if (this.value && !this.value.includes(',')) { 
+                                this.value += ',0'; 
+                            } else if (this.value.endsWith(',')) { 
+                                this.value += '0'; 
+                            }">
+                <label for="whitebloodcellmin"><b>Bạch Cầu Min</b></label>
+            </div>
+            <div class="input-field col s6 align-center">
+                <input type="text" id="whitebloodcellmax"
+                    oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" onblur="
+                            if (this.value.includes('.')) {
+                                this.value = this.value.replace('.', ',');
+                            } else if (this.value && !this.value.includes(',')) { 
+                                this.value += ',0'; 
+                            } else if (this.value.endsWith(',')) { 
+                                this.value += '0'; 
+                            }
+                            const whitebloodcellmin = parseFloat(document.getElementById('whitebloodcellmin').value.replace(',', '.'));
+                            const whitebloodcellmax = parseFloat(this.value.replace(',', '.'));
+                            if (whitebloodcellmax <= whitebloodcellmin) {
+                                Swal.fire('Lỗi', 'Giá trị Max không được nhỏ hơn hoặc bằng giá trị min', 'error');
+                                this.value = (whitebloodcellmin + 1).toString().replace('.', ',');
+                            }">
+                <label for="whitebloodcellmax"><b>Bạch Cầu Max</b></label>
+            </div>
+        </div>
+        <!-- Chỉ số xét nghiệm (Hồng Cầu) -->
+        <div class="row">
+            <div class="input-field col s6 align-center">
+                <input type="text" id="redbloodcellmin"
+                    oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" onblur="
+                            if (this.value.includes('.')) {
+                                this.value = this.value.replace('.', ',');
+                            } else if (this.value && !this.value.includes(',')) { 
+                                this.value += ',0'; 
+                            } else if (this.value.endsWith(',')) { 
+                                this.value += '0'; 
+                            }">
+                <label for="redbloodcellmin"><b>Hồng Cầu Min</b></label>
+            </div>
+            <div class="input-field col s6 align-center">
+                <input type="text" id="redbloodcellmax"
+                    oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" onblur="
+                            if (this.value.includes('.')) {
+                                this.value = this.value.replace('.', ',');
+                            } else if (this.value && !this.value.includes(',')) { 
+                                this.value += ',0'; 
+                            } else if (this.value.endsWith(',')) { 
+                                this.value += '0'; 
+                            }
+                            const redbloodcellmin = parseFloat(document.getElementById('redbloodcellmin').value.replace(',', '.'));
+                            const redbloodcellmax = parseFloat(this.value.replace(',', '.'));
+                            if (redbloodcellmax <= redbloodcellmin) {
+                                Swal.fire('Lỗi', 'Giá trị Max không được nhỏ hơn hoặc bằng giá trị Min', 'error');
+                                this.value = (redbloodcellmin + 1).toString().replace('.', ',');
+                            }">
+                <label for="redbloodcellmax"><b>Hồng Cầu Max</b></label>
+            </div>
+        </div>
+        <!-- Chỉ số xét nghiệm (Tiểu Cầu) -->
+        <div class="row">
+            <div class="input-field col s6 align-center">
+                <input type="text" id="plateletmin" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                <label for="plateletmin"><b>Tiểu Cầu Min</b></label>
+            </div>
+            <div class="input-field col s6 align-center">
+                <input type="text" id="plateletmax" oninput="this.value = this.value.replace(/[^0-9]/g, '');" onblur="
+                            const plateletmin = parseInt(document.getElementById('plateletmin').value, 10);
+                            const plateletmax = parseInt(this.value, 10);
+                            if (plateletmax <= plateletmin) {
+                                Swal.fire('Lỗi', 'Giá trị Max không được nhỏ hơn hoặc bằng giá trị Min', 'error');
+                                this.value = plateletmin + 10; // Đặt giá trị mặc định lớn hơn Tiểu Cầu Min
+                            }">
+                <label for="plateletmax"><b>Tiểu Cầu Max</b></label>
+            </div>
+        </div>
+        <!-- Chỉ số xét nghiệm (Glucose) -->
+        <div class="row">
+            <div class="input-field col s6 align-center">
+                <input type="text" id="Glucosemin"
+                    oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" onblur="
+                            if (this.value.includes('.')) {
+                                this.value = this.value.replace('.', ',');
+                            } else if (this.value && !this.value.includes(',')) { 
+                                this.value += ',0'; 
+                            } else if (this.value.endsWith(',')) { 
+                                this.value += '0'; 
+                            }">
+                <label for="Glucosemin"><b>Glucose Min</b></label>
+            </div>
+            <div class="input-field col s6 align-center">
+                <input type="text" id="Glucosemax"
+                    oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" onblur="
+                            if (this.value.includes('.')) {
+                                this.value = this.value.replace('.', ',');
+                            } else if (this.value && !this.value.includes(',')) { 
+                                this.value += ',0'; 
+                            } else if (this.value.endsWith(',')) { 
+                                this.value += '0'; 
+                            }
+                            const Glucosemin = parseFloat(document.getElementById('Glucosemin').value.replace(',', '.'));
+                            const Glucosemax = parseFloat(this.value.replace(',', '.'));
+                            if (Glucosemax <= Glucosemin) {
+                                Swal.fire('Lỗi', 'Giá trị Max không được nhỏ hơn hoặc bằng giá trị Min', 'error');
+                                this.value = (Glucosemin + 1).toString().replace('.', ',');
+                            }">
+                <label for="Glucosemax"><b>Glucose Max</b></label>
+            </div>
+        </div>
+        <!-- Chỉ số xét nghiệm (Ure) -->
+        <div class="row">
+            <div class="input-field col s6 align-center">
+                <input type="text" id="Uremin"
+                    oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" onblur="
+                            if (this.value.includes('.')) {
+                                this.value = this.value.replace('.', ',');
+                            } else if (this.value && !this.value.includes(',')) { 
+                                this.value += ',0'; 
+                            } else if (this.value.endsWith(',')) { 
+                                this.value += '0'; 
+                            }">
+                <label for="Uremin"><b>Ure Min</b></label>
+            </div>
+            <div class="input-field col s6 align-center">
+                <input type="text" id="Uremax"
+                    oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" onblur="
+                            if (this.value.includes('.')) {
+                                this.value = this.value.replace('.', ',');
+                            } else if (this.value && !this.value.includes(',')) { 
+                                this.value += ',0'; 
+                            } else if (this.value.endsWith(',')) { 
+                                this.value += '0'; 
+                            }
+                            const Uremin = parseFloat(document.getElementById('Uremin').value.replace(',', '.'));
+                            const Uremax = parseFloat(this.value.replace(',', '.'));
+                            if (Uremax <= Uremin) {
+                                Swal.fire('Lỗi', 'Giá trị Max không được nhỏ hơn hoặc bằng giá trị Min', 'error');
+                                this.value = (Uremin + 1).toString().replace('.', ',');
+                            }">
+                <label for="Uremax"><b>Ure Max</b></label>
+            </div>
+        </div>
+        <!-- Chỉ số xét nghiệm (Creatinin) -->
+        <div class="row">
+            <div class="input-field col s6 align-center">
+                <input type="text" id="Creatininmin"
+                    oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" onblur="
+                            if (this.value.includes('.')) {
+                                this.value = this.value.replace('.', ',');
+                            } else if (this.value && !this.value.includes(',')) { 
+                                this.value += ',0'; 
+                            } else if (this.value.endsWith(',')) { 
+                                this.value += '0'; 
+                            }">
+                <label for="Creatininmin"><b>Creatinin Min</b></label>
+            </div>
+            <div class="input-field col s6 align-center">
+                <input type="text" id="Creatininmax"
+                    oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" onblur="
+                            if (this.value.includes('.')) {
+                                this.value = this.value.replace('.', ',');
+                            } else if (this.value && !this.value.includes(',')) { 
+                                this.value += ',0'; 
+                            } else if (this.value.endsWith(',')) { 
+                                this.value += '0'; 
+                            }
+                            const Creatininmin = parseFloat(document.getElementById('Creatininmin').value.replace(',', '.'));
+                            const Creatininmax = parseFloat(this.value.replace(',', '.'));
+                            if (Creatininmax <= Creatininmin) {
+                                Swal.fire('Lỗi', 'Giá trị Max không được nhỏ hơn hoặc bằng giá trị Min', 'error');
+                                this.value = (Creatininmin + 1).toString().replace('.', ',');
+                            }">
+                <label for="Creatininmax"><b>Creatinin Max</b></label>
+            </div>
+        </div>
+        <!-- Chỉ số xét nghiệm (SGOT) -->
+        <div class="row">
+            <div class="input-field col s6 align-center">
+                <input type="text" id="SGOTmin"
+                    oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" onblur="
+                            if (this.value.includes('.')) {
+                                this.value = this.value.replace('.', ',');
+                            } else if (this.value && !this.value.includes(',')) { 
+                                this.value += ',0'; 
+                            } else if (this.value.endsWith(',')) { 
+                                this.value += '0'; 
+                            }">
+                <label for="SGOTmin"><b>SGOT (AST) Min</b></label>
+            </div>
+            <div class="input-field col s6 align-center">
+                <input type="text" id="SGOTmax"
+                    oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" onblur="
+                            if (this.value.includes('.')) {
+                                this.value = this.value.replace('.', ',');
+                            } else if (this.value && !this.value.includes(',')) { 
+                                this.value += ',0'; 
+                            } else if (this.value.endsWith(',')) { 
+                                this.value += '0'; 
+                            }
+                            const SGOTmin = parseFloat(document.getElementById('SGOTmin').value.replace(',', '.'));
+                            const SGOTmax = parseFloat(this.value.replace(',', '.'));
+                            if (SGOTmax <= SGOTmin) {
+                                Swal.fire('Lỗi', 'Giá trị Max không được nhỏ hơn hoặc bằng giá trị Min', 'error');
+                                this.value = (SGOTmin + 1).toString().replace('.', ',');
+                            }">
+                <label for="SGOTmax"><b>SGOT (AST) Max</b></label>
+            </div>
+        </div>
+        <!-- Chỉ số xét nghiệm (SGPT) -->
+        <div class="row">
+            <div class="input-field col s6 align-center">
+                <input type="text" id="SGPTmin"
+                    oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" onblur="
+                            if (this.value.includes('.')) {
+                                this.value = this.value.replace('.', ',');
+                            } else if (this.value && !this.value.includes(',')) { 
+                                this.value += ',0'; 
+                            } else if (this.value.endsWith(',')) { 
+                                this.value += '0'; 
+                            }">
+                <label for="SGPTmin"><b>SGPT (ALT) Min</b></label>
+            </div>
+            <div class="input-field col s6 align-center">
+                <input type="text" id="SGPTmax"
+                    oninput="this.value = this.value.replace(/[^0-9,.]/g, '').replace(/(,.*?,)/g, ',');" onblur="
+                            if (this.value.includes('.')) {
+                                this.value = this.value.replace('.', ',');
+                            } else if (this.value && !this.value.includes(',')) { 
+                                this.value += ',0'; 
+                            } else if (this.value.endsWith(',')) { 
+                                this.value += '0'; 
+                            }
+                            const SGPTmin = parseFloat(document.getElementById('SGPTmin').value.replace(',', '.'));
+                            const SGPTmax = parseFloat(this.value.replace(',', '.'));
+                            if (SGPTmax <= SGPTmin) {
+                                Swal.fire('Lỗi', 'Giá trị Max không được nhỏ hơn hoặc bằng giá trị Min', 'error');
+                                this.value = (SGPTmin + 1).toString().replace('.', ',');
+                            }">
+                <label for="SGPTmax"><b>SGPT (ALT) Max</b></label>
+            </div>
+        </div>
+
+        <div class="row" style="display: flex; justify-content: space-between; gap: 15px; margin-top: 30px;">
+            <button class="btn waves-effect waves-light blue darken" style="flex: 1;" onclick="fetchEditData()"><b>Load
+                    Dữ Liệu Ngưỡng</b></button>
+            <button class="btn waves-effect waves-light green darken" style="flex: 1;"
+                onclick="updateLimitRangeData()"><b>Cập Nhật Dữ Liệu</b></button>
+        </div>
+    </div>
+
+    <script>
+        const scriptURL = "https://script.google.com/macros/s/AKfycbz_eGXI1hGmeHjtElHxPXzciawj1a9DQkWNL3spjJXr5EDbmTRMm8TQvpnyk2-59vFn/exec";
+        const scriptURL_nguong = "https://script.google.com/macros/s/AKfycbxIR-l6b23tkC3iYOd-36WBhJTx8qb7vpPkD__csaFi35POgGMCh0x8NzrniVf2KXcJ_w/exec";
+
+        M.updateTextFields();
+
+        // Tự động gọi khi trang được load
+        document.addEventListener("DOMContentLoaded", function () {
+            localStorage.removeItem("cccdData");
+            localStorage.removeItem("nameData");
+            
+            getAllDataOnLoad();
+            getAllCCCDToArray();
+
+            saveDefaultData(); // Hàm để lưu dữ liệu mặc định vào Google Sheets
+            updateDate();
+        });
+
+        function fetchEditData() {
+            showLoading();
+
+            let url = `${scriptURL_nguong}?action=fetchdata`;
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length === 0) {
+                        Swal.fire("Thông báo", "Không tìm thấy dữ liệu.", "info");
+                        M.updateTextFields();
+                        return;
+                    }
+
+                    let userData = data[0];
+                    document.getElementById("bmimin").value = userData[0].toString().replace('.', ',');
+                    document.getElementById("bmimax").value = userData[1].toString().replace('.', ',');
+                    document.getElementById("bloodpressuremin").value = userData[2]
+                    document.getElementById("bloodpressuremax").value = userData[3];
+                    document.getElementById("whitebloodcellmin").value = userData[4].toString().replace('.', ',');
+                    document.getElementById("whitebloodcellmax").value = userData[5].toString().replace('.', ',');
+                    document.getElementById("redbloodcellmin").value = userData[6].toString().replace('.', ',');
+                    document.getElementById("redbloodcellmax").value = userData[7].toString().replace('.', ',');
+                    document.getElementById("plateletmin").value = userData[8];
+                    document.getElementById("plateletmax").value = userData[9];
+                    document.getElementById("Glucosemin").value = userData[10].toString().replace('.', ',');
+                    document.getElementById("Glucosemax").value = userData[11].toString().replace('.', ',');
+                    document.getElementById("Uremin").value = userData[12].toString().replace('.', ',');
+                    document.getElementById("Uremax").value = userData[13].toString().replace('.', ',');
+                    document.getElementById("Creatininmin").value = userData[14].toString().replace('.', ',');
+                    document.getElementById("Creatininmax").value = userData[15].toString().replace('.', ',');
+                    document.getElementById("SGOTmin").value = userData[16].toString().replace('.', ',');
+                    document.getElementById("SGOTmax").value = userData[17].toString().replace('.', ',');
+                    document.getElementById("SGPTmin").value = userData[18].toString().replace('.', ',');
+                    document.getElementById("SGPTmax").value = userData[19].toString().replace('.', ',');
+                    M.updateTextFields(); // Cập nhật giao diện Materialize
+                    hideLoading(); // Ẩn spinner và mở khóa thao tác
+                })
+                .catch(error => {
+                    console.error("Lỗi:", error);
+                    Swal.fire("Lỗi", "Đã xảy ra lỗi khi tìm kiếm.", "error");
+                    hideLoading();
+                });
+        }
+
+        function saveDefaultData() {
+
+            let bmimin = 18.5.toString().replace('.', ',');
+            let bmimax = 24.9.toString().replace('.', ',');
+            let bloodpressuremin = "90/60";
+            let bloodpressuremax = "139/85";
+            let whitebloodcellmin = 3.9.toString().replace('.', ',');
+            let whitebloodcellmax = 10.9.toString().replace('.', ',');
+            let redbloodcellmin = 4.2.toString().replace('.', ',');
+            let redbloodcellmax = 6.1.toString().replace('.', ',');
+            let plateletmin = 150;
+            let plateletmax = 450;
+            let Glucosemin = 3.9.toString().replace('.', ',');
+            let Glucosemax = 5.6.toString().replace('.', ',');
+            let Uremin = 2.5.toString().replace('.', ',');
+            let Uremax = 7.5.toString().replace('.', ',');
+            let Creatininmin = 61.9.toString().replace('.', ',');
+            let Creatininmax = 114.9.toString().replace('.', ',');
+            let SGOTmin = 0.1.toString().replace('.', ',');
+            let SGOTmax = 39.9.toString().replace('.', ',');
+            let SGPTmin = 0.1.toString().replace('.', ',');
+            let SGPTmax = 39.9.toString().replace('.', ',');
+
+            let url = `${scriptURL_nguong}?action=savedefalutdata` +
+                `&bmimin=${encodeURIComponent(bmimin)}` +
+                `&bmimax=${encodeURIComponent(bmimax)}` +
+                `&bloodpressuremin=${encodeURIComponent(bloodpressuremin)}` +
+                `&bloodpressuremax=${encodeURIComponent(bloodpressuremax)}` +
+                `&whitebloodcellmin=${encodeURIComponent(whitebloodcellmin)}` +
+                `&whitebloodcellmax=${encodeURIComponent(whitebloodcellmax)}` +
+                `&redbloodcellmin=${encodeURIComponent(redbloodcellmin)}` +
+                `&redbloodcellmax=${encodeURIComponent(redbloodcellmax)}` +
+                `&plateletmin=${encodeURIComponent(plateletmin)}` +
+                `&plateletmax=${encodeURIComponent(plateletmax)}` +
+                `&Glucosemin=${encodeURIComponent(Glucosemin)}` +
+                `&Glucosemax=${encodeURIComponent(Glucosemax)}` +
+                `&Uremin=${encodeURIComponent(Uremin)}` +
+                `&Uremax=${encodeURIComponent(Uremax)}` +
+                `&Creatininmin=${encodeURIComponent(Creatininmin)}` +
+                `&Creatininmax=${encodeURIComponent(Creatininmax)}` +
+                `&SGOTmin=${encodeURIComponent(SGOTmin)}` +
+                `&SGOTmax=${encodeURIComponent(SGOTmax)}` +
+                `&SGPTmin=${encodeURIComponent(SGPTmin)}` +
+                `&SGPTmax=${encodeURIComponent(SGPTmax)}`;
+
+            fetch(url)
+                .then(response => response.text())
+                .then(data => {
+                    fetchEditData();
+                    M.updateTextFields();
+                })
+                .catch(error => console.error("Lỗi:", error));
+        }
+
+        function updateLimitRangeData() {
+            showLoading(); // Hiện spinner và khóa thao tác
+
+            let bmimin = document.getElementById("bmimin").value.trim();
+            let bmimax = document.getElementById("bmimax").value.trim();
+            let bloodpressuremin = document.getElementById("bloodpressuremin").value.trim();
+            let bloodpressuremax = document.getElementById("bloodpressuremax").value.trim();
+            let whitebloodcellmin = document.getElementById("whitebloodcellmin").value.trim();
+            let whitebloodcellmax = document.getElementById("whitebloodcellmax").value.trim();
+            let redbloodcellmin = document.getElementById("redbloodcellmin").value.trim();
+            let redbloodcellmax = document.getElementById("redbloodcellmax").value.trim();
+            let plateletmin = document.getElementById("plateletmin").value.trim();
+            let plateletmax = document.getElementById("plateletmax").value.trim();
+            let Glucosemin = document.getElementById("Glucosemin").value.trim();
+            let Glucosemax = document.getElementById("Glucosemax").value.trim();
+            let Uremin = document.getElementById("Uremin").value.trim();
+            let Uremax = document.getElementById("Uremax").value.trim();
+            let Creatininmin = document.getElementById("Creatininmin").value.trim();
+            let Creatininmax = document.getElementById("Creatininmax").value.trim();
+            let SGOTmin = document.getElementById("SGOTmin").value.trim();
+            let SGOTmax = document.getElementById("SGOTmax").value.trim();
+            let SGPTmin = document.getElementById("SGPTmin").value.trim();
+            let SGPTmax = document.getElementById("SGPTmax").value.trim();
+
+            if (!bmimin || !bmimax || !bloodpressuremin || !bloodpressuremax || !whitebloodcellmin || !whitebloodcellmax ||
+                !redbloodcellmin || !redbloodcellmax || !plateletmin || !plateletmax || !Glucosemin || !Glucosemax ||
+                !Uremin || !Uremax || !Creatininmin || !Creatininmax || !SGOTmin || !SGOTmax || !SGPTmin || !SGPTmax) {
+                Swal.fire("Lỗi", "Vui lòng nhập đầy đủ thông tin.", "error");
+                hideLoading(); // Ẩn spinner và mở khóa thao tác
+                return;
+            }
+            
+            let url = `${scriptURL_nguong}?action=updateeditdata` +
+                `&bmimin=${encodeURIComponent(bmimin)}` +
+                `&bmimax=${encodeURIComponent(bmimax)}` +
+                `&bloodpressuremin=${encodeURIComponent(bloodpressuremin)}` +
+                `&bloodpressuremax=${encodeURIComponent(bloodpressuremax)}` +
+                `&whitebloodcellmin=${encodeURIComponent(whitebloodcellmin)}` +
+                `&whitebloodcellmax=${encodeURIComponent(whitebloodcellmax)}` +
+                `&redbloodcellmin=${encodeURIComponent(redbloodcellmin)}` +
+                `&redbloodcellmax=${encodeURIComponent(redbloodcellmax)}` +
+                `&plateletmin=${encodeURIComponent(plateletmin)}` +
+                `&plateletmax=${encodeURIComponent(plateletmax)}` +
+                `&Glucosemin=${encodeURIComponent(Glucosemin)}` +
+                `&Glucosemax=${encodeURIComponent(Glucosemax)}` +
+                `&Uremin=${encodeURIComponent(Uremin)}` +
+                `&Uremax=${encodeURIComponent(Uremax)}` +
+                `&Creatininmin=${encodeURIComponent(Creatininmin)}` +
+                `&Creatininmax=${encodeURIComponent(Creatininmax)}` +
+                `&SGOTmin=${encodeURIComponent(SGOTmin)}` +
+                `&SGOTmax=${encodeURIComponent(SGOTmax)}` +
+                `&SGPTmin=${encodeURIComponent(SGPTmin)}` +
+                `&SGPTmax=${encodeURIComponent(SGPTmax)}`;
+
+            fetch(url)
+                .then(response => response.text())
+                .then(data => {
+                    Swal.fire("Thành công", data, "success");
+                    clearInputs([
+                        "bmimin", "bmimax", "bloodpressuremin", "bloodpressuremax",
+                        "whitebloodcellmin", "whitebloodcellmax", "redbloodcellmin", "redbloodcellmax",
+                        "plateletmin", "plateletmax", "Glucosemin", "Glucosemax", "Uremin", "Uremax",
+                        "Creatininmin", "Creatininmax", "SGOTmin", "SGOTmax", "SGPTmin", "SGPTmax"
+                    ]);
+                    hideLoading(); // Ẩn spinner và mở khóa thao tác
+                    M.updateTextFields(); // Cập nhật giao diện Materialize
+                })
+                .catch(error => console.error("Lỗi:", error));
+                hideLoading(); // Ẩn spinner và mở khóa thao tác
+        }
+
+        window.addEventListener("unload", function () {
+            clearInputs([
+                "bmimin", "bmimax", "bloodpressuremin", "bloodpressuremax",
+                "whitebloodcellmin", "whitebloodcellmax", "redbloodcellmin", "redbloodcellmax",
+                "plateletmin", "plateletmax", "Glucosemin", "Glucosemax", "Uremin", "Uremax",
+                "Creatininmin", "Creatininmax", "SGOTmin", "SGOTmax", "SGPTmin", "SGPTmax"
+            ]);
+            M.updateTextFields(); // Cập nhật giao diện Materialize
+        });
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Page</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Thêm Chart.js từ CDN (nếu bạn vẫn sử dụng biểu đồ khác) -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
+    <!-- Thêm Mermaid.js để vẽ lưu đồ -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <!-- Load Google Charts -->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <script src="utils.js"></script>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        body {
+            /* display: flex;
+            flex-direction: row;
+            height: 100vh;
+            margin: 0; */
+            /* font-family: 'Roboto', sans-serif;
+            background: #f4f4f9; */
+            font-family: 'Roboto', sans-serif;
+            text-align: center;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="navbar">
+        <div class="nav-left">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                <span style="font-size: 16px; color: rgb(241, 244, 252);"><b>BỆNH VIỆN ĐA KHOA KHA VẠN CÂN</b></span>
+                <span style="font-size: 12px; color: rgb(213, 221, 241);"><b>HỆ THỐNG QUẢN LÝ DỮ LIỆU SỨC KHỎE NHÂN VIÊN</b></span>
+            </div>
+        </div>
+        <div class="nav-center">
+            <div class="search-container">
+                <input type="text" class="search-bar" placeholder="Tìm kiếm dữ liệu"
+                    oninput="searchCCCDDataInSearchBar(this.value)">
+                <button class="search-btn" title="Search"><i class="fas fa-search search-icon"></i></button>
+                <ul class="search-dropdown" id="searchResults"></ul>
+            </div>
+        </div>
+        <div class="nav-right">
+            <span class="date-display" id="dateDisplay"></span>
+            <button class="home-btn" type="button" title="Go to Home Page" onclick="goHome()"><i
+                    class="fas fa-home"></i></button>
+        </div>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+        <ul class="sidebar-menu">
+            <!-- Nhân sự -->
+            <li class="menu-group">
+                <div class="menu-header" onclick="toggleSubMenu(this)">
+                    <div class="icon-wrapper">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <span> Nhân sự</span>
+                    <i class="fas fa-chevron-down arrow-icon"></i>
+                </div>   
+                <ul class="submenu">
+                    <li onclick="window.location.href='add_new.html'">
+                        <i class="fas fa-plus" style="margin-left: 25px;"></i><span> Thêm dữ liệu mới</span>
+                    </li>
+                    <li onclick="window.location.href='edit.html'">
+                        <i class="fas fa-edit" style="margin-left: 25px;"></i><span> Sửa dữ liệu</span>
+                    </li>
+                    <li onclick="window.location.href='delete.html'">
+                        <i class="fas fa-trash" style="margin-left: 25px;"></i><span> Xóa dữ liệu</span>
+                    </li>
+                </ul>
+            </li>
+        
+            <!-- Chuyên Khoa -->
+            <li class="menu-group">
+                <div class="menu-header" onclick="toggleSubMenu(this)">
+                    <div class="icon-wrapper">
+                        <i class="fas fa-stethoscope"></i>
+                    </div>
+                    <span> Chuyên Khoa</span>
+                    <i class="fas fa-chevron-down arrow-icon"></i>
+                </div>                
+                <ul class="submenu">
+                    <li onclick="window.location.href='add_limit.html'">
+                        <i class="fas fa-ruler-combined" style="margin-left: 25px;"></i><span> Sửa ngưỡng chuẩn</span>
+                    </li>
+                </ul>
+            </li>
+        </ul>        
+        
+        <div class="logout">
+            <div class="icon-wrapper">
+                <i class="fas fa-sign-out-alt"></i>
+            </div>
+            <span> Đăng xuất</span>
+        </div>
+    </div>
+
+    <div class="content" id="content">
+        <h2>Thống kê sức khỏe nhân viên theo tỉ lệ / số lượng</h2>
+        <div id="piechart-container" style="width: 100%; border-radius: 10px; overflow: hidden;">
+            <div id="piechart" style="width: 100%; height: 350px;"></div>
+        </div>
+        <!-- Container cho biểu đồ (nếu bạn vẫn cần vẽ Chart.js) -->
+        <!-- <div id="chart-container">
+            <canvas id="myChart"></canvas>
+        </div> -->
+        <h2>Thống kê sức khỏe nhân viên theo khoa phòng</h2>
+        <div id="bangThongKeTheoKhoaPhong">Đang tải dữ liệu...</div>
+        <h2>Thống kê sức khỏe nhân viên theo các chỉ số sức khỏe</h2>
+        <!-- <div id="chart_div_by_column" style="width: 100%; height: auto;"></div> -->
+        <div id="chart_div_by_column-container" style="width: 100%; border-radius: 10px; overflow: hidden;">
+            <div id="chart_div_by_column" style="width: 100%; height: 350px;"></div>
+        </div>
+    </div>
+    <script>
+
+        const scriptURL = "https://script.google.com/macros/s/AKfycbz_eGXI1hGmeHjtElHxPXzciawj1a9DQkWNL3spjJXr5EDbmTRMm8TQvpnyk2-59vFn/exec";
+        const scriptURL_admin = "https://script.google.com/macros/s/AKfycbxIR-l6b23tkC3iYOd-36WBhJTx8qb7vpPkD__csaFi35POgGMCh0x8NzrniVf2KXcJ_w/exec";
+
+        // Tự động gọi khi trang được load
+        document.addEventListener("DOMContentLoaded", function () {
+            localStorage.removeItem("cccdData");
+            localStorage.removeItem("nameData");
+            
+            getAllDataOnLoad();
+            getAllCCCDToArray();
+
+            saveDefaultData();
+            updateDate();
+        });
+
+        // Load the Visualization API and the corechart package.
+        google.charts.load("current", { packages: ["corechart"] });
+        google.charts.setOnLoadCallback(drawCircleChart);
+
+        async function drawCircleChart() {
+            try {
+                const response = await fetch("https://script.google.com/macros/s/AKfycbz_eGXI1hGmeHjtElHxPXzciawj1a9DQkWNL3spjJXr5EDbmTRMm8TQvpnyk2-59vFn/exec?action=getHealthRatio");
+                const data = await response.json();
+
+                const coBenh = data.coBenh;
+                const khongBenh = data.khongBenh;
+                const tong = coBenh + khongBenh;
+
+                const percentCoBenh = ((coBenh / tong) * 100).toFixed(1);
+                const percentKhongBenh = ((khongBenh / tong) * 100).toFixed(1);
+
+                // Gộp số lượng và phần trăm vào nhãn
+                const chartData = google.visualization.arrayToDataTable([
+                    ["Tình trạng", "Số lượng"],
+                    [`Mắc vấn đề sức khỏe: ${coBenh}`, coBenh],
+                    [`Không mắc vấn đề sức khỏe: ${khongBenh} `, khongBenh],
+                ]);
+
+                const container = document.getElementById('piechart-container');
+                const width = container.offsetWidth;
+                const height = Math.min(width * 0.6, 350);
+
+                const options = {
+                    // title: "Tỉ Lệ Nhân Viên Có Vấn Đề Sức Khỏe / Khỏe ",
+                    pieSliceText: "none", // Không hiển thị văn bản trong lát cắt
+                    tooltip: {
+                        text: "none",       // Không hiện tooltip (nếu bạn muốn ẩn luôn)
+                    },
+                    legend: {
+                        position: 'right', // Hiển thị nhánh rẽ bên phải
+                        textStyle: { fontSize: 14 }
+                    },
+                    slices: {
+                        0: { offset: 0 },
+                        1: { offset: 0 },
+                    },
+                    chartArea: {
+                        width: "85%",
+                        height: "85%",
+                    },
+                    legend: {
+                        position: 'labeled', // Hiển thị label trong legend
+                        alignment: 'center',
+                    },
+                    colors: ["#e74c3c", "#2ecc71"],
+
+                    width: width,
+                    height: height,
+                };
+
+                const chart = new google.visualization.PieChart(document.getElementById("piechart"));
+                chart.draw(chartData, options);
+
+            } catch (err) {
+                console.error("Lỗi khi vẽ biểu đồ:", err);
+            }
+
+            window.addEventListener('resize', drawCircleChart);
+            sidebar.addEventListener('transitionend', drawCircleChart);
+        }
+
+        fetch("https://script.google.com/macros/s/AKfycbz_eGXI1hGmeHjtElHxPXzciawj1a9DQkWNL3spjJXr5EDbmTRMm8TQvpnyk2-59vFn/exec?action=laythongkekhoaphong")
+            .then(res => {
+                if (!res.ok) throw new Error("Network response was not ok");
+                return res.json();
+            })
+            .then(data => {
+                if (!Array.isArray(data)) throw new Error("Invalid data format");
+
+                let html = `
+                <table border="1" cellpadding="8" cellspacing="0">
+                <tr>
+                    <th>Khoa phòng</th>
+                    <th>Tổng nhân viên</th>
+                    <th>Số nhân viên có vấn đề sức khỏe</th>
+                    <th>Số nhân viên không có vấn đề sức khỏe</th>
+                </tr>`;
+
+                data.forEach(row => {
+                    html += `
+                <tr>
+                    <td>${row.khoa}</td>
+                    <td>${row.tongNhanVien}</td>
+                    <td>${row.soNguoiCoBenh}</td>
+                    <td>${row.soNguoiKhongBenh ?? (row.tongNhanVien - row.soNguoiCoBenh)}</td>
+                </tr>`;
+                });
+
+                html += '</table>';
+                document.getElementById("bangThongKeTheoKhoaPhong").innerHTML = html;
+            })
+            .catch(err => {
+                document.getElementById("bangThongKeTheoKhoaPhong").innerHTML = "Lỗi khi tải dữ liệu.";
+                console.error("Lỗi fetch dữ liệu:", err);
+            });
+
+        google.charts.load('current', { packages: ['corechart'] });
+        google.charts.setOnLoadCallback(drawColumnChart);
+
+        async function drawColumnChart() {
+            try {
+                const response = await fetch("https://script.google.com/macros/s/AKfycbz_eGXI1hGmeHjtElHxPXzciawj1a9DQkWNL3spjJXr5EDbmTRMm8TQvpnyk2-59vFn/exec?action=chartcolumnnumberhealthindex");
+                const rawData = await response.json();
+
+                const chartData = [['Chỉ số sức khỏe', 'Số lượng nhân viên có vấn đề sức khỏe']];
+                rawData.forEach(item => chartData.push([item.column, item.count]));
+
+                const data = google.visualization.arrayToDataTable(chartData);
+
+                const container = document.getElementById('chart_div_by_column-container');
+                const width = container.offsetWidth;
+                const height = Math.min(width * 0.6, 350);
+
+                const options = {
+                    // title: 'Số lượng giá trị khác "BT" theo từng cột',
+                    hAxis: { title: 'Chỉ số sức khỏe', titleTextStyle: { bold: true } },
+                    vAxis: { title: 'Số lượng nhân viên có vấn đề sức khỏe', titleTextStyle: { bold: true } },
+                    legend: 'none',
+                    width: width,
+                    height: height,
+                    colors: ['#25a171']
+                };
+
+                const chart = new google.visualization.ColumnChart(document.getElementById('chart_div_by_column'));
+                chart.draw(data, options);
+
+            } catch (error) {
+                console.error("Lỗi khi lấy dữ liệu hoặc vẽ biểu đồ:", error);
+            }
+            window.addEventListener('resize', drawColumnChart);
+            sidebar.addEventListener('transitionend', drawColumnChart);
+        }
+
+    </script>
+</body>
+
+</html>

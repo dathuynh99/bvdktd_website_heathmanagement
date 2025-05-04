@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xóa dữ liệu hiện có trên sheet (Nhân Sự)</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <!-- Thư viện Noti đẹp -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+    <!-- Thêm Mermaid.js để vẽ lưu đồ -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <!-- Load Google Charts -->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <script src="utils.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style_input_btn.css">
+
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            text-align: center;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        /* .delete-container {
+            max-width: 800px;
+            margin: 80px auto 0;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            transition: margin-left 0.7s;
+            margin-left: calc(50% - 400px);
+        } */
+
+        /* .sidebar.expanded~.delete-container {
+            margin-left: calc(50% - 400px + 126.5px);
+        } */
+    </style>
+</head>
+
+<body>
+    <div class="navbar">
+        <div class="nav-left">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div style="display: flex; flex-direction: column; align-items: left; gap: 5px;">
+                <span style="font-size: 16px; color: rgb(241, 244, 252);"><b>BỆNH VIỆN ĐA KHOA KHA VẠN CÂN</b></span>
+                <span style="font-size: 12px; color: rgb(213, 221, 241);"><b>HỆ THỐNG QUẢN LÝ DỮ LIỆU SỨC KHỎE NHÂN VIÊN</b></span>
+            </div>
+        </div>
+        <div class="nav-center">
+            <div class="search-container">
+                <input type="text" class="search-bar" placeholder="Tìm kiếm dữ liệu"
+                    oninput="searchCCCDDataInSearchBar(this.value)">
+                <button class="search-btn" title="Search"><i class="fas fa-search"></i></button>
+                <ul class="search-dropdown" id="searchResults"></ul>
+            </div>
+        </div>
+        <div class="nav-right">
+            <span class="date-display" id="dateDisplay"></span>
+            <button class="home-btn" type="button" title="Go to Home Page" onclick="goHome()"><i
+                    class="fas fa-home"></i></button>
+        </div>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+        <ul class="sidebar-menu">
+            <!-- Nhân sự -->
+            <li class="menu-group">
+                <div class="menu-header" onclick="toggleSubMenu(this)">
+                    <div class="icon-wrapper">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <span> Nhân sự</span>
+                    <i class="fas fa-chevron-down arrow-icon"></i>
+                </div>   
+                <ul class="submenu">
+                    <li onclick="window.location.href='add_new.html'">
+                        <i class="fas fa-plus" style="margin-left: 25px;"></i><span> Thêm dữ liệu mới</span>
+                    </li>
+                    <li onclick="window.location.href='edit.html'">
+                        <i class="fas fa-edit" style="margin-left: 25px;"></i><span> Sửa dữ liệu</span>
+                    </li>
+                    <li onclick="window.location.href='delete.html'">
+                        <i class="fas fa-trash" style="margin-left: 25px;"></i><span> Xóa dữ liệu</span>
+                    </li>
+                </ul>
+            </li>
+        
+            <!-- Chuyên Khoa -->
+            <li class="menu-group">
+                <div class="menu-header" onclick="toggleSubMenu(this)">
+                    <div class="icon-wrapper">
+                        <i class="fas fa-stethoscope"></i>
+                    </div>
+                    <span> Chuyên Khoa</span>
+                    <i class="fas fa-chevron-down arrow-icon"></i>
+                </div>                
+                <ul class="submenu">
+                    <li onclick="window.location.href='add_limit.html'">
+                        <i class="fas fa-ruler-combined" style="margin-left: 25px;"></i><span> Sửa ngưỡng chuẩn</span>
+                    </li>
+                </ul>
+            </li>
+        </ul>        
+        
+        <div class="logout">
+            <div class="icon-wrapper">
+                <i class="fas fa-sign-out-alt"></i>
+            </div>
+            <span> Đăng xuất</span>
+        </div>
+    </div>
+
+    <!-- /* ------------------------------------------------------------------------------------------------------------- */ -->
+
+    <div class="content">
+        <!-- <h4 class="title">Xóa dữ liệu</h4> -->
+        <div class="input-field">
+            <input type="text" id="deleteID" placeholder=" " oninput="handleInput(this)">
+            <label for="deleteID">Nhập CCCD cần tìm</label>
+        </div>
+
+        <table class="striped centered highlight">
+            <thead class="blue white-text">
+                <tr>
+                    <th>Họ tên</th>
+                    <th>Khoa Phòng</th>
+                    <th>Chức danh nghề nghiệp</th>
+                    <th>Năm sinh</th>
+                    <th>SĐT</th>
+                    <th>CCCD</th>
+                </tr>
+            </thead>
+            <tbody id="resultTable"></tbody>
+        </table>
+
+        <div class="row" style="display: flex; justify-content: space-between; gap: 15px; margin-top: 30px;">
+            <button id="searchfordeleteBtn" class="btn green darken waves-effect waves-light" style="flex: 1;"
+                onclick="searchData()" disabled><b>Load dữ
+                    liệu</b></button>
+            <button class="btn red lighten-1 waves-effect waves-light" style="flex: 1;" 
+                onclick="deleteData()"><b>Xóa dữ
+                    liệu</b></button>
+        </div>
+    </div>
+
+    <script>
+        const scriptURL = "https://script.google.com/macros/s/AKfycbz_eGXI1hGmeHjtElHxPXzciawj1a9DQkWNL3spjJXr5EDbmTRMm8TQvpnyk2-59vFn/exec";
+
+        let isCheckInfoAgain = false; // Biến toàn cục để kiểm tra có cần gọi lại hàm checkInfo hay không
+
+        // Tự động gọi khi trang được load
+        document.addEventListener("DOMContentLoaded", function () {
+            getAllDataOnLoad();
+            updateDate();
+        });
+
+        document.querySelectorAll('.waves-effect').forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                const rect = this.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                this.style.setProperty('--x', `${x}px`);
+                this.style.setProperty('--y', `${y}px`);
+
+                // Trigger ripple by toggling class
+                this.classList.remove('ripple-active');
+                void this.offsetWidth; // Force reflow
+                this.classList.add('ripple-active');
+            });
+        });
+
+
+        function deleteData() {
+            let id = document.getElementById("deleteID").value.trim().replace(/^0+/, '');
+            if (!id) {
+                Swal.fire("Lỗi", "Vui lòng nhập CCCD cần xóa.", "error");
+                return;
+            }
+
+            if (!isCheckInfoAgain) {
+                Swal.fire("Lỗi", "Vui lòng tìm kiếm thông tin trước khi xóa.", "error");
+                return;
+            }
+            else {
+                Swal.fire({
+                    title: "Bạn có chắc muốn xóa ID này ?",
+                    text: "Sau khi xóa sẽ  không thể khôi phục lại.",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: '<span style="display: inline-block; width: 100px;">Tiếp tục</span>',
+                    cancelButtonText: '<span style="display: inline-block; width: 100px;">Hủy</span>'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        let url = `${scriptURL}?action=deleteuser&id=${encodeURIComponent(id)}`;
+                        fetch(url)
+                            .then(response => response.text())
+                            .then(data => {
+                                Swal.fire("Thông báo", data, "info");
+                                clearInputs(["deleteID"]);
+                                M.updateTextFields();
+                                // Clear the resultTable after deletion
+                                document.getElementById("resultTable").innerHTML = "";
+                            })
+                            .catch(error => console.error("Lỗi:", error));
+                    }
+                });
+                isCheckInfoAgain = false; // Đặt lại biến sau khi đã xác nhận xóa
+            }
+        }
+
+        function searchData() {
+            let query = document.getElementById("deleteID").value.trim().replace(/^0+/, '');
+            if (!query) {
+                Swal.fire("Lỗi", "Vui lòng nhập ID hoặc tên để tìm kiếm.", "error");
+                return;
+            }
+            showLoading(); // Hiện spinner và chữ "Đang load dữ liệu"
+            let url = `${scriptURL}?action=searchuser&query=${encodeURIComponent(query)}`;
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    let table = document.getElementById("resultTable");
+                    table.innerHTML = "";
+                    if (data.length === 0) {
+                        Swal.fire("Thông báo", "Không tìm thấy dữ liệu.", "info");
+                        hideLoading(); // Ẩn spinner và chữ "Đang load dữ liệu"
+                        clearInputs(["deleteID"]);
+                        M.updateTextFields();
+                        return;
+                    }
+                    data.forEach(row => {
+                        let tr = document.createElement("tr");
+                        for (let i = 1; i < 7; i++) { // Chỉ lấy 4 cột đầu tiên
+                            let td = document.createElement("td");
+                            td.textContent = row[i];
+                            tr.appendChild(td);
+                        }
+                        table.appendChild(tr);
+                        hideLoading(); // Ẩn spinner và chữ "Đang load dữ liệu"
+                        isCheckInfoAgain = true; // Đánh dấu là đã tìm kiếm thông tin
+                    });
+                })
+                .catch(error => {
+                    console.error("Lỗi:", error);
+                    hideLoading(); // Ẩn spinner và chữ "Đang load dữ liệu"
+                    Swal.fire("Lỗi", "Đã xảy ra lỗi khi tìm kiếm.", "error");
+                });
+        }
+
+        function handleInput(inputEl) {
+            const cleanValue = inputEl.value.replace(/[^0-9]/g, '').slice(0, 12);
+            inputEl.value = cleanValue;
+
+            const btn = document.getElementById('searchfordeleteBtn');
+            btn.disabled = cleanValue.length !== 12;
+        }
+
+    </script>
+</body>
+
+</html>
